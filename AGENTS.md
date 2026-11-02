@@ -62,7 +62,7 @@ for event in app.stream(inputs, config={'configurable': {'thread_id': 's1'}}):
 | **Phase 4** | Gemini LLM integration, structured Pydantic schemas, fast observe extraction | ✅ Complete | 30/30 unit tests passed |
 | **Phase 5** | FastAPI Backend & SSE streaming endpoints | ✅ Complete | 10/10 integration tests passed |
 | **Phase 6** | Next.js / React User Interface | ✅ Complete | Production build verified (`next build`) |
-| **Phase 7** | Evaluation Harness, 5 Adversarial Scenarios, Capstone Report | ⏳ **Next to build** | — |
+| **Phase 7** | Evaluation Harness, 5 Adversarial Scenarios, Capstone Report | ✅ Complete | 6/6 evaluation scenarios passed, report generated |
 
 ---
 
@@ -200,7 +200,7 @@ agentic-ai-project/
 
 ---
 
-### Phase 7 — Evaluation, Adversarial Testing & Capstone Report (⏳ Next to Build)
+### Phase 7 — Evaluation, Adversarial Testing & Capstone Report (✅ Complete)
 
 **Goal:** Fulfill the capstone deliverables from Slides 22 & 23.
 
@@ -218,7 +218,7 @@ agentic-ai-project/
 
 ---
 
-### Phase 8 — Polish & Optional Enhancements
+### Phase 8 — Polish & Optional Enhancements (⏳ Ready)
 - LangSmith tracing integration (`LANGCHAIN_TRACING_V2=true`).
 - Tier 2 language support (TypeScript / JavaScript).
 - Persistent SQLite checkpointer.
@@ -243,4 +243,4 @@ flowchart LR
     P7 --> P8["Phase 8\nPolish"]
 ```
 
-> **Current status:** Phases 0 through 6 are **Complete**. Start directly with **Phase 7 (Evaluation, Adversarial Testing & Capstone Report)**.
+> **Current status:** Phases 0 through 7 are **Complete**. All capstone deliverables, adversarial benchmarks, and full-stack services are verified.

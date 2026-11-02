@@ -4,7 +4,9 @@ FastAPI route definitions for RepoMind investigation endpoints.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status
 from sse_starlette.sse import EventSourceResponse
