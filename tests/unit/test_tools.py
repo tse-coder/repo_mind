@@ -3,21 +3,19 @@ Unit tests for all 10 execution tools, snapshot resolver, and secret scanner.
 """
 
 from pathlib import Path
-import pytest
 
+from backend.knowledge.secret_scanner import redact_secrets, scan_for_secrets
 from backend.knowledge.snapshot import get_snapshot_info
-from backend.knowledge.secret_scanner import scan_for_secrets, redact_secrets
 from backend.tools import dispatch_tool
 from backend.tools.explore_tree import explore_tree
+from backend.tools.find_references import find_references
+from backend.tools.get_relationships import get_relationships
+from backend.tools.get_symbol import get_symbol
 from backend.tools.read_file import read_file
 from backend.tools.search_code import search_code
 from backend.tools.search_symbols import search_symbols
-from backend.tools.get_symbol import get_symbol
-from backend.tools.find_references import find_references
-from backend.tools.get_relationships import get_relationships
-from backend.tools.trace_calls import trace_calls
 from backend.tools.semantic_search import semantic_search
-from backend.tools.get_history import get_history
+from backend.tools.trace_calls import trace_calls
 
 SAMPLE_REPO = Path(__file__).resolve().parent.parent / "fixtures" / "sample_repo"
 

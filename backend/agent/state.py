@@ -8,8 +8,7 @@ so each node can return new items without clobbering previous entries.
 from __future__ import annotations
 
 import operator
-from typing import Annotated, Any, Optional, TypedDict
-
+from typing import Annotated, Any, TypedDict
 
 # ── Sub-structures ─────────────────────────────────────────────────────────────
 
@@ -101,7 +100,7 @@ class InvestigationState(TypedDict):
     evidence_slots: dict[str, str]  # slot_name -> "OPEN" | "SUPPORTED" | "INFERRED" | "UNANSWERABLE"
     plan: list[PlanGoal]
     plan_version: int
-    current_goal_id: Optional[str]
+    current_goal_id: str | None
 
     # ── Append-only stores ─────────────────────────────────────────────────────
     tool_history: Annotated[list[ToolCallRecord], operator.add]
@@ -110,7 +109,7 @@ class InvestigationState(TypedDict):
     reflections: Annotated[list[ReflectionEntry], operator.add]
 
     # ── Current tool call (ephemeral, passed between select → policy → execute → observe) ──
-    current_tool_call: Optional[dict[str, Any]]
+    current_tool_call: dict[str, Any] | None
 
     # ── Retry tracking ─────────────────────────────────────────────────────────
     retry_ledger: dict[str, StrategyRetry]
@@ -122,8 +121,8 @@ class InvestigationState(TypedDict):
     clarification_count: int
 
     # ── Results ────────────────────────────────────────────────────────────────
-    draft_answer: Optional[str]
-    final_answer: Optional[str]
+    draft_answer: str | None
+    final_answer: str | None
     limitations: list[str]
     status: str  # "RUNNING" | "PAUSED" | "SUFFICIENT" | "PARTIAL" | "FAILED"
 

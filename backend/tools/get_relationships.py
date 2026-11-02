@@ -5,6 +5,7 @@ get_relationships tool — Inspects import and dependency relationships for a fi
 from __future__ import annotations
 
 from typing import Any
+
 from backend.knowledge.ast_parser import RepoASTIndex
 
 

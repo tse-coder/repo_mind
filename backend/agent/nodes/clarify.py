@@ -4,7 +4,7 @@ clarify_node — Pauses the investigation for user input using LangGraph interru
 
 from __future__ import annotations
 
-from typing import Any
+from langgraph.errors import GraphInterrupt
 from langgraph.types import interrupt
 
 from backend.agent.state import InvestigationState
@@ -22,11 +22,18 @@ def clarify_node(state: InvestigationState) -> dict:
             "question": clarification_question,
             "clarification_count": state.get("clarification_count", 0) + 1,
         })
+    except GraphInterrupt:
+        raise
     except Exception:
         # Fallback if interrupt is not supported in current runner context
         user_response = "User confirmed default flow."
 
+    updated_query = state.get("query", "")
+    if isinstance(user_response, str) and user_response:
+        updated_query = f"{updated_query} (User clarification: {user_response})"
+
     return {
+        "query": updated_query,
         "needs_clarification": False,
         "clarification_count": state.get("clarification_count", 0) + 1,
         "status": "RUNNING",

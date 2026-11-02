@@ -4,26 +4,26 @@ RepoMind LangGraph Engine — Assembles the complete StateGraph for repository i
 Defines all nodes, edges, conditional branches, and checkpointing.
 """
 
-from typing import Any, Literal
-from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import MemorySaver
+from typing import Literal
 
-from backend.agent.state import InvestigationState
-from backend.agent.nodes.intake import intake_node
-from backend.agent.nodes.classify import classify_node
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
+
+from backend.agent.nodes.answer import answer_node
 from backend.agent.nodes.clarify import clarify_node
-from backend.agent.nodes.plan import plan_node
-from backend.agent.nodes.select_action import select_action_node
-from backend.agent.nodes.policy_check import policy_check_node
-from backend.agent.nodes.execute_tool import execute_tool_node
-from backend.agent.nodes.observe import observe_node
+from backend.agent.nodes.classify import classify_node
 from backend.agent.nodes.evaluate import evaluate_node
-from backend.agent.nodes.reflect import reflect_node
+from backend.agent.nodes.execute_tool import execute_tool_node
+from backend.agent.nodes.intake import intake_node
+from backend.agent.nodes.observe import observe_node
+from backend.agent.nodes.plan import plan_node
+from backend.agent.nodes.policy_check import policy_check_node
 from backend.agent.nodes.reconcile import reconcile_node
+from backend.agent.nodes.reflect import reflect_node
+from backend.agent.nodes.select_action import select_action_node
 from backend.agent.nodes.synthesize import synthesize_node
 from backend.agent.nodes.verify import verify_node
-from backend.agent.nodes.answer import answer_node
-
+from backend.agent.state import InvestigationState
 
 # ── Conditional Routing Functions ──────────────────────────────────────────────
 

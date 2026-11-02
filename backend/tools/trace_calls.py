@@ -5,6 +5,7 @@ trace_calls tool — Recursively traces static function and method invocations f
 from __future__ import annotations
 
 from typing import Any
+
 from backend.knowledge.ast_parser import RepoASTIndex
 
 

@@ -5,6 +5,7 @@ find_references tool — Locates all invocations and usages of a symbol across r
 from __future__ import annotations
 
 from typing import Any
+
 from backend.knowledge.ast_parser import RepoASTIndex
 
 

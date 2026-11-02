@@ -4,9 +4,8 @@ explore_tree tool — Navigates repository structure at configurable depth and f
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 DEFAULT_EXCLUDED_DIRS = frozenset({
     ".git",
@@ -26,7 +25,7 @@ def explore_tree(
     repo_path: str,
     subpath: str = ".",
     depth: int = 2,
-    glob_pattern: Optional[str] = None,
+    glob_pattern: str | None = None,
     max_entries: int = 100,
 ) -> dict[str, Any]:
     """List directory contents within the repository at given depth and pattern."""

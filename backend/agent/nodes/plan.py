@@ -5,7 +5,7 @@ plan_node — Creates or revises an investigation plan based on open evidence sl
 from __future__ import annotations
 
 import uuid
-from typing import List
+
 from pydantic import BaseModel, Field
 
 from backend.agent.llm import get_llm
@@ -18,7 +18,7 @@ class PlannedGoalItem(BaseModel):
 
 
 class PlanProposal(BaseModel):
-    goals: List[PlannedGoalItem] = Field(description="Ordered list of investigation sub-goals.")
+    goals: list[PlannedGoalItem] = Field(description="Ordered list of investigation sub-goals.")
     revision_reason: str = Field(default="", description="If revising an existing plan, explanation of why.")
 
 

@@ -4,14 +4,15 @@ search_symbols tool — Finds symbols by name and kind across the repository AST
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
+
 from backend.knowledge.ast_parser import RepoASTIndex
 
 
 def search_symbols(
     repo_path: str,
     query: str,
-    kind: Optional[str] = None,
+    kind: str | None = None,
     max_results: int = 25,
 ) -> dict[str, Any]:
     """Search for classes, functions, or methods by name."""

@@ -5,14 +5,15 @@ get_symbol tool — Retrieves detailed definition information for a specific sym
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
+
 from backend.knowledge.ast_parser import RepoASTIndex
 
 
 def get_symbol(
     repo_path: str,
     symbol_name: str,
-    file_path: Optional[str] = None,
+    file_path: str | None = None,
 ) -> dict[str, Any]:
     """Retrieve the exact signature, docstring, and definition range for a symbol."""
     ast_index = RepoASTIndex(repo_path)

@@ -2,18 +2,19 @@
 Tools registry and dispatcher for RepoMind execution tools.
 """
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from backend.tools.explore_tree import explore_tree
+from backend.tools.find_references import find_references
+from backend.tools.get_history import get_history
+from backend.tools.get_relationships import get_relationships
+from backend.tools.get_symbol import get_symbol
 from backend.tools.read_file import read_file
 from backend.tools.search_code import search_code
 from backend.tools.search_symbols import search_symbols
-from backend.tools.get_symbol import get_symbol
-from backend.tools.find_references import find_references
-from backend.tools.get_relationships import get_relationships
-from backend.tools.trace_calls import trace_calls
 from backend.tools.semantic_search import semantic_search
-from backend.tools.get_history import get_history
+from backend.tools.trace_calls import trace_calls
 
 TOOL_REGISTRY: dict[str, Callable[..., dict[str, Any]]] = {
     "explore_tree": explore_tree,

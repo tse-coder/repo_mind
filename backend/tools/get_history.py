@@ -6,14 +6,14 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.knowledge.snapshot import get_snapshot_info
 
 
 def get_history(
     repo_path: str,
-    file_path: Optional[str] = None,
+    file_path: str | None = None,
     max_commits: int = 10,
 ) -> dict[str, Any]:
     """Retrieve recent git commit log for the repository or a specific file."""

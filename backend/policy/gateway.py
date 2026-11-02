@@ -11,15 +11,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
 class PolicyCheckResult:
     allowed: bool
     status: str  # "APPROVED" | "DENIED"
-    reason: Optional[str] = None
-    sanitized_args: Optional[dict[str, Any]] = None
+    reason: str | None = None
+    sanitized_args: dict[str, Any] | None = None
 
 
 # Allowed execution and meta tools

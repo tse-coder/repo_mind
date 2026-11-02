@@ -4,8 +4,8 @@ select_action_node — Chooses the next read-only tool to execute with a 1-sente
 
 from __future__ import annotations
 
-import json
-from typing import Any, Dict, Literal
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 from backend.agent.llm import get_llm
@@ -26,7 +26,7 @@ class ToolDecision(BaseModel):
         "get_history",
         "finish",
     ] = Field(description="The tool to execute next, or 'finish' if sufficient evidence is already gathered.")
-    arguments: Dict[str, Any] = Field(
+    arguments: dict[str, Any] = Field(
         default_factory=dict,
         description="Arguments strictly adhering to the selected tool schema.",
     )

@@ -6,8 +6,8 @@ Configures Google Gemini via langchain-google-genai.
 
 from __future__ import annotations
 
-import os
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 from backend.config import GOOGLE_API_KEY, LLM_MODEL_NAME, LLM_TEMPERATURE
 
 

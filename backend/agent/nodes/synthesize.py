@@ -65,7 +65,7 @@ Evidence Citations:
         ])
         content = response.content if isinstance(response.content, str) else str(response.content)
         return {"draft_answer": content}
-    except Exception as e:
+    except Exception:
         # Fallback synthesis
         fallback_lines = [f"## Investigation Results\n\n**Query:** {query}\n\n### Findings:"]
         for f in findings:

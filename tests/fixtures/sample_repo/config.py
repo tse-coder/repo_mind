@@ -1,4 +1,3 @@
-import os
 
 # Sample config file
 APP_NAME = "SampleAuthService"

@@ -5,7 +5,7 @@ semantic_search tool — Concept-to-code retrieval using local ChromaDB and Fast
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.knowledge.snapshot import get_snapshot_info
 from backend.knowledge.vector_store import RepoVectorStore, chunk_file_by_lines
@@ -16,7 +16,7 @@ def semantic_search(
     repo_path: str,
     query: str,
     k: int = 5,
-    path_scope: Optional[str] = None,
+    path_scope: str | None = None,
 ) -> dict[str, Any]:
     """Search repository code using natural language semantic similarity."""
     root = Path(repo_path).resolve()

@@ -10,7 +10,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -23,8 +23,8 @@ class SymbolInfo:
     start_line: int
     end_line: int
     signature: str = ""
-    docstring: Optional[str] = None
-    parent: Optional[str] = None
+    docstring: str | None = None
+    parent: str | None = None
 
 
 @dataclass
@@ -198,7 +198,7 @@ class RepoASTIndex:
                 # Error-tolerant parsing: syntax error in one file degrades only that file
                 continue
 
-    def search_symbols(self, query: str, kind: Optional[str] = None) -> list[SymbolInfo]:
+    def search_symbols(self, query: str, kind: str | None = None) -> list[SymbolInfo]:
         """Search symbols by name (case-insensitive substring) and optional kind."""
         q = query.lower()
         results: list[SymbolInfo] = []
@@ -209,7 +209,7 @@ class RepoASTIndex:
                 results.append(s)
         return results
 
-    def get_symbol(self, symbol_name: str, file_path: Optional[str] = None) -> Optional[SymbolInfo]:
+    def get_symbol(self, symbol_name: str, file_path: str | None = None) -> SymbolInfo | None:
         """Retrieve exact symbol definition."""
         for s in self.symbols:
             if s.name == symbol_name:

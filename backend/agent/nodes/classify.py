@@ -4,7 +4,8 @@ classify_node — Analyzes the user question, determines category, entities, and
 
 from __future__ import annotations
 
-from typing import List, Literal
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from backend.agent.llm import get_llm
@@ -17,7 +18,7 @@ class QueryClassification(BaseModel):
     query_type: Literal[
         "LOCATE", "TRACE_FLOW", "ARCHITECTURE", "DEPENDENCY", "ERROR_ORIGIN", "MIXED"
     ] = Field(description="The primary category of the investigation question.")
-    entities: List[str] = Field(
+    entities: list[str] = Field(
         default_factory=list,
         description="Key symbols, file names, routes, or modules explicitly or implicitly referenced.",
     )
@@ -29,7 +30,7 @@ class QueryClassification(BaseModel):
         default="",
         description="If needs_clarification is True, the concise question to ask the user.",
     )
-    evidence_slots: List[str] = Field(
+    evidence_slots: list[str] = Field(
         default_factory=list,
         description="List of specific sub-questions or facts that must be discovered (e.g. ['entrypoint', 'validation_logic', 'database_call']).",
     )
@@ -74,7 +75,7 @@ def classify_node(state: InvestigationState) -> dict:
             "evidence_slots": slots_dict,
             "next_route": "clarify" if result.needs_clarification else "plan",
         }
-    except Exception as e:
+    except Exception:
         # Fallback heuristic if LLM call fails
         return {
             "query_type": "LOCATE",

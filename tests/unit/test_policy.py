@@ -3,10 +3,9 @@ Unit tests for the Policy Gateway, path sandboxing, and output framing.
 """
 
 from pathlib import Path
-import pytest
 
-from backend.policy.gateway import PolicyGateway
 from backend.policy.framing import frame_untrusted_content
+from backend.policy.gateway import PolicyGateway
 
 SAMPLE_REPO = Path(__file__).resolve().parent.parent / "fixtures" / "sample_repo"
 

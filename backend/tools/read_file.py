@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import READ_FILE_MAX_LINES
 
@@ -24,8 +24,8 @@ def is_binary_file(file_path: Path) -> bool:
 def read_file(
     repo_path: str,
     file_path: str,
-    start_line: Optional[int] = None,
-    end_line: Optional[int] = None,
+    start_line: int | None = None,
+    end_line: int | None = None,
     max_lines: int = READ_FILE_MAX_LINES,
 ) -> dict[str, Any]:
     """Read lines from a file with content hash and line range verification."""

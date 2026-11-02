@@ -1,6 +1,6 @@
-from typing import Optional
+
 from tests.fixtures.sample_repo.models.user import User
-from tests.fixtures.sample_repo.utils.helpers import hash_password, generate_token
+from tests.fixtures.sample_repo.utils.helpers import generate_token, hash_password
 
 
 class AuthService:
@@ -23,7 +23,7 @@ class AuthService:
         self._users[username] = user
         return user
 
-    def authenticate(self, username: str, password: str) -> Optional[str]:
+    def authenticate(self, username: str, password: str) -> str | None:
         """Authenticate user credentials and return session token."""
         user = self._users.get(username)
         if not user or user.hashed_password != hash_password(password):

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import SEARCH_MAX_RESULTS
 from backend.tools.explore_tree import DEFAULT_EXCLUDED_DIRS
@@ -16,7 +16,7 @@ def search_code(
     repo_path: str,
     query: str,
     is_regex: bool = False,
-    path_scope: Optional[str] = None,
+    path_scope: str | None = None,
     max_results: int = SEARCH_MAX_RESULTS,
 ) -> dict[str, Any]:
     """Search for literal text or regex patterns in repository source code."""

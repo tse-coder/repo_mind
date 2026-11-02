@@ -9,7 +9,6 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
 
 import chromadb
 from fastembed import TextEmbedding
@@ -30,7 +29,7 @@ class SemanticChunk:
 class RepoVectorStore:
     """Manages semantic embeddings and retrieval for a repository snapshot."""
 
-    def __init__(self, snapshot_id: str, persist_dir: Optional[str] = None):
+    def __init__(self, snapshot_id: str, persist_dir: str | None = None):
         self.snapshot_id = snapshot_id
         self.persist_dir = persist_dir or CHROMA_PERSIST_DIR
         self._embedding_model = TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
@@ -70,7 +69,7 @@ class RepoVectorStore:
             metadatas=metadatas,
         )
 
-    def search(self, query: str, top_k: int = 5, path_scope: Optional[str] = None) -> list[SemanticChunk]:
+    def search(self, query: str, top_k: int = 5, path_scope: str | None = None) -> list[SemanticChunk]:
         """Perform semantic similarity search."""
         if self.collection.count() == 0:
             return []

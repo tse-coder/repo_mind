@@ -4,6 +4,7 @@ RepoMind configuration — loads environment variables and provides shared setti
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()

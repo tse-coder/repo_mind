@@ -60,8 +60,8 @@ for event in app.stream(inputs, config={'configurable': {'thread_id': 's1'}}):
 | **Phase 2** | Knowledge Plane: AST engine, ChromaDB vector store, secret scanner, 10 tools | ✅ Complete | 13/13 unit tests passed |
 | **Phase 3** | Policy Gateway (path sandboxing, allowlist, secret redaction, framing) | ✅ Complete | 6/6 policy tests passed |
 | **Phase 4** | Gemini LLM integration, structured Pydantic schemas, fast observe extraction | ✅ Complete | 30/30 unit tests passed |
-| **Phase 5** | FastAPI Backend & SSE streaming endpoints | ⏳ **Next to build** | — |
-| **Phase 6** | Next.js / React User Interface | ⏳ Pending | — |
+| **Phase 5** | FastAPI Backend & SSE streaming endpoints | ✅ Complete | 10/10 integration tests passed |
+| **Phase 6** | Next.js / React User Interface | ⏳ **Next to build** | — |
 | **Phase 7** | Evaluation Harness, 5 Adversarial Scenarios, Capstone Report | ⏳ Pending | — |
 
 ---
@@ -161,7 +161,7 @@ agentic-ai-project/
 
 ---
 
-### Phase 5 — FastAPI Backend & SSE Streaming (⏳ Next to Build)
+### Phase 5 — FastAPI Backend & SSE Streaming (✅ Complete)
 
 **Goal:** Expose the LangGraph investigation agent over HTTP with real-time Server-Sent Events (SSE) streaming.
 
@@ -182,11 +182,11 @@ agentic-ai-project/
      - `event: done` (completion).
    - `POST /api/investigate/resume/{id}`: Delivers user feedback to resume interrupted runs (`Command(resume=...)`).
    - `GET /api/investigate/{id}/state`: Returns current state snapshot.
-3. **`tests/integration/test_api.py`**: Integration tests for FastAPI endpoints using `httpx.AsyncClient`.
+3. **`tests/integration/test_api.py`**: Integration tests for FastAPI endpoints using `httpx.AsyncClient` (10/10 passed).
 
 ---
 
-### Phase 6 — Next.js / React User Interface (⏳ Pending)
+### Phase 6 — Next.js / React User Interface (⏳ Next to Build)
 
 **Goal:** Interactive browser-based dashboard for exploring repositories with the agent.
 
@@ -243,4 +243,4 @@ flowchart LR
     P7 --> P8["Phase 8\nPolish"]
 ```
 
-> **Current status:** Phases 0 through 4 are **Complete**. Start directly with **Phase 5 (FastAPI Backend & SSE Streaming)**.
+> **Current status:** Phases 0 through 5 are **Complete**. Start directly with **Phase 6 (Next.js / React User Interface)**.

@@ -3,7 +3,6 @@ Integration test for the LangGraph skeleton — verifies full end-to-end executi
 with stub nodes and MemorySaver checkpointing.
 """
 
-import pytest
 from backend.agent.graph import create_investigation_app
 
 
