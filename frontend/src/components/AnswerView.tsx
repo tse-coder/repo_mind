@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, ShieldCheck, AlertCircle, Copy, Check, Sparkles } from 'lucide-react';
+import { FileText, ShieldCheck, AlertCircle, Copy, Check } from 'lucide-react';
 import { FindingItem } from '../types';
 
 interface AnswerViewProps {
@@ -31,30 +31,30 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
   };
 
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 shadow-lg flex flex-col space-y-4">
+    <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm flex flex-col space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
-          <Award className="w-5 h-5 text-emerald-400" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-gray-200">
-            Investigation Synthesized Answer
+          <FileText className="w-4 h-4 text-slate-700" />
+          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
+            Synthesized Investigation Result
           </h2>
         </div>
         {displayText && (
           <button
             type="button"
             onClick={copyAnswer}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 border border-gray-700 transition"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-slate-100 hover:bg-slate-200 text-xs font-mono text-slate-700 border border-slate-300 transition"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Copied</span>
               </>
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5" />
-                <span>Copy Answer</span>
+                <span>Copy</span>
               </>
             )}
           </button>
@@ -63,38 +63,38 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
 
       {/* Main Answer Area */}
       {!displayText ? (
-        <div className="py-12 flex flex-col items-center justify-center text-center text-gray-500 text-xs">
-          <Sparkles className="w-8 h-8 mb-2 stroke-1 text-gray-600" />
-          <span>The synthesized final answer with verified line citations will render here.</span>
+        <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400 text-xs font-mono">
+          <FileText className="w-6 h-6 mb-2 stroke-1 text-slate-300" />
+          <span>The verified final answer with line citations will render here upon completion.</span>
         </div>
       ) : (
         <div className="space-y-4">
           {/* Answer Text */}
-          <div className="p-4 rounded-lg bg-[#090d16] border border-gray-800 text-sm text-gray-200 font-sans leading-relaxed whitespace-pre-wrap">
+          <div className="p-4 rounded-none bg-slate-50 border border-slate-200 text-sm text-slate-900 font-sans leading-relaxed whitespace-pre-wrap">
             {displayText}
           </div>
 
           {/* Finding Confidence Ratings */}
           {findings.length > 0 && (
-            <div className="p-3.5 rounded-lg bg-gray-900/60 border border-gray-800 space-y-2">
-              <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider block flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Verified Claim Confidence:
+            <div className="p-3.5 rounded-none bg-slate-50 border border-slate-200 space-y-2">
+              <span className="text-xs font-mono font-semibold text-slate-700 uppercase tracking-wider block flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-600" /> Claim Verification Breakdown:
               </span>
               <div className="space-y-1.5">
                 {findings.map((f, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs">
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded uppercase font-semibold shrink-0 ${
+                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded-none uppercase font-semibold shrink-0 border ${
                         f.confidence === 'CONFIRMED'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                           : f.confidence === 'INFERRED'
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          ? 'bg-amber-50 text-amber-700 border-amber-300'
+                          : 'bg-red-50 text-red-700 border-red-300'
                       }`}
                     >
                       {f.confidence}
                     </span>
-                    <span className="text-gray-300">{f.claim}</span>
+                    <span className="text-slate-800">{f.claim}</span>
                   </div>
                 ))}
               </div>
@@ -103,11 +103,11 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
 
           {/* Limitations and Knowledge Gaps */}
           {limitations.length > 0 && (
-            <div className="p-3.5 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-1.5">
-              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider block flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400" /> Explicit Limitations & Unanswerable Slots:
+            <div className="p-3.5 rounded-none bg-amber-50 border border-amber-200 space-y-1.5">
+              <span className="text-xs font-mono font-semibold text-amber-800 uppercase tracking-wider block flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-700" /> Knowledge Gaps & Unanswerable Slots:
               </span>
-              <ul className="list-disc list-inside text-xs text-gray-300 space-y-1">
+              <ul className="list-disc list-inside text-xs text-slate-700 space-y-1">
                 {limitations.map((lim, i) => (
                   <li key={i}>{lim}</li>
                 ))}
@@ -119,4 +119,3 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
     </div>
   );
 };
-

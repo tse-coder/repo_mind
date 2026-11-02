@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Folder,
   Search,
-  Sparkles,
   Sliders,
   Play,
   Loader2,
@@ -75,18 +74,15 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
 
     const firstFile = files[0] as any;
     let candidate = '';
-    // Chromium / desktop environment exposes the full filesystem path
     if (firstFile.path) {
       const fullPath = firstFile.path;
       candidate = fullPath.substring(0, fullPath.lastIndexOf('/')) || fullPath;
     } else if (firstFile.webkitRelativePath) {
-      // Browsers standard sandbox only gives the root folder name
       candidate = firstFile.webkitRelativePath.split('/')[0];
     }
 
     if (!candidate) return;
 
-    // Immediately resolve candidate via backend to get the exact absolute path on device
     try {
       const res = await fetch(`/api/resolve-path?path=${encodeURIComponent(candidate)}`);
       if (res.ok) {
@@ -103,13 +99,13 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
   };
 
   return (
-    <div className="bg-[#111827] border border-[#1f2937] rounded-xl p-5 shadow-lg">
+    <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Builtin Folder Selector Input */}
         <div>
-          <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <Folder className="w-3.5 h-3.5 text-blue-400" />
-            Target Repository Folder
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 font-mono">
+            <Folder className="w-3.5 h-3.5 text-slate-600" />
+            Target Repository Directory
           </label>
 
           <div className="space-y-2">
@@ -121,18 +117,18 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
               directory=""
               onChange={handleFolderSelect}
               disabled={isLoading}
-              className="w-full text-xs text-gray-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 file:cursor-pointer cursor-pointer bg-[#090d16] border border-gray-800 rounded-lg p-1.5 focus:outline-none"
+              className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-mono file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer bg-slate-50 border border-slate-300 rounded-none p-1.5 focus:outline-none focus:border-slate-800"
             />
 
             {/* Editable path input showing current or selected path */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-gray-500 font-mono shrink-0">Path:</span>
+              <span className="text-[11px] text-slate-500 font-mono shrink-0">Path:</span>
               <input
                 type="text"
                 value={repoPath}
                 onChange={(e) => setRepoPath(e.target.value)}
                 placeholder="/absolute/path/to/repository or relative path"
-                className="flex-1 bg-[#090d16] border border-gray-800 rounded px-3 py-1.5 text-xs text-gray-200 font-mono focus:outline-none focus:border-blue-500"
+                className="flex-1 bg-white border border-slate-300 rounded-none px-3 py-1.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-slate-800"
                 disabled={isLoading}
                 required
               />
@@ -140,27 +136,27 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
 
             {/* Live Path Resolution Feedback */}
             {resolvedInfo && (
-              <div className="text-[11px] font-mono px-2 py-1 rounded bg-black/40 border border-gray-800/80">
+              <div className="text-[11px] font-mono px-2 py-1 bg-slate-50 border border-slate-200 rounded-none">
                 {resolvedInfo.exists ? (
-                  <div className="flex items-center justify-between text-emerald-400">
+                  <div className="flex items-center justify-between text-emerald-700">
                     <span className="flex items-center gap-1.5 truncate">
-                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                      <span className="text-gray-400">Resolved:</span> {resolvedInfo.resolved_path}
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                      <span className="text-slate-500">Verified:</span> {resolvedInfo.resolved_path}
                     </span>
                     {resolvedInfo.resolved_path !== repoPath && (
                       <button
                         type="button"
                         onClick={() => setRepoPath(resolvedInfo.resolved_path || repoPath)}
-                        className="text-[10px] text-blue-400 underline ml-2 shrink-0 hover:text-blue-300"
+                        className="text-[10px] text-blue-600 underline ml-2 shrink-0 hover:text-blue-800"
                       >
                         Use Absolute
                       </button>
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-amber-400">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Path not found on host. Check path or use absolute directory path.</span>
+                  <div className="flex items-center gap-1.5 text-amber-700">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
+                    <span>Path not found. Verify directory exists.</span>
                   </div>
                 )}
               </div>
@@ -168,14 +164,14 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
           </div>
 
           {/* Quick path chips */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-[11px] text-gray-500">Quick select:</span>
+          <div className="flex items-center gap-1.5 mt-2">
+            <span className="text-[11px] text-slate-400 font-mono">Quick:</span>
             {QUICK_PATHS.map((item) => (
               <button
                 key={item.path}
                 type="button"
                 onClick={() => setRepoPath(item.path)}
-                className="text-[11px] px-2 py-0.5 rounded bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/60 transition"
+                className="text-[11px] font-mono px-2 py-0.5 rounded-none bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
                 disabled={isLoading}
               >
                 {item.label}
@@ -186,30 +182,30 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
 
         {/* Query Input */}
         <div>
-          <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-            <Search className="w-3.5 h-3.5 text-blue-400" />
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5 font-mono">
+            <Search className="w-3.5 h-3.5 text-slate-600" />
             Investigation Query
           </label>
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask an architectural, flow-tracing, error-origin, or symbol question..."
+            placeholder="Enter question about repository structure, flows, or symbols..."
             rows={2}
-            className="w-full bg-[#090d16] border border-gray-800 rounded-lg px-3.5 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+            className="w-full bg-white border border-slate-300 rounded-none px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
             disabled={isLoading}
             required
           />
           {/* Example query chips */}
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            <span className="text-[11px] text-gray-500 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" /> Examples:
+            <span className="text-[11px] text-slate-400 font-mono">
+              Templates:
             </span>
             {EXAMPLE_QUERIES.map((q, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setQuery(q)}
-                className="text-[11px] px-2 py-0.5 rounded bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 border border-blue-800/40 transition truncate max-w-[280px]"
+                className="text-[11px] px-2 py-0.5 rounded-none bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition truncate max-w-[280px]"
                 disabled={isLoading}
                 title={q}
               >
@@ -220,10 +216,10 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
         </div>
 
         {/* Controls Row */}
-        <div className="pt-2 border-t border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
+        <div className="pt-2 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400 flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-gray-400" /> Max Tool Steps:
+            <span className="text-xs text-slate-600 flex items-center gap-1.5 font-mono">
+              <Sliders className="w-3.5 h-3.5 text-slate-500" /> Max Steps:
             </span>
             <input
               type="range"
@@ -231,10 +227,10 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
               max="20"
               value={maxSteps}
               onChange={(e) => setMaxSteps(parseInt(e.target.value, 10))}
-              className="w-28 accent-blue-500 cursor-pointer"
+              className="w-28 accent-slate-900 cursor-pointer"
               disabled={isLoading}
             />
-            <span className="text-xs font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+            <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-none border border-slate-300">
               {maxSteps}
             </span>
           </div>
@@ -242,17 +238,17 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
           <button
             type="submit"
             disabled={isLoading || !repoPath.trim() || !query.trim() || (resolvedInfo !== null && !resolvedInfo.exists)}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 transition cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2 rounded-none bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Investigating...</span>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>INVESTIGATING...</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-white" />
-                <span>Run Investigation</span>
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>EXECUTE INVESTIGATION</span>
               </>
             )}
           </button>

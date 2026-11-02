@@ -12,7 +12,6 @@ interface ClarificationModalProps {
 
 export const ClarificationModal: React.FC<ClarificationModalProps> = ({
   prompt,
-  investigationId,
   onResume,
 }) => {
   const [response, setResponse] = useState('');
@@ -33,57 +32,57 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#111827] border border-blue-500/40 rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-300 rounded-none max-w-lg w-full p-6 shadow-xl space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30">
-            <HelpCircle className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-none bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-300">
+            <HelpCircle className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Agent Clarification Request</h3>
-            <p className="text-xs text-gray-400">
-              The agent needs human guidance to proceed with this investigation.
+            <h3 className="text-sm font-mono font-bold text-slate-900">Clarification Required</h3>
+            <p className="text-xs text-slate-500">
+              Agent execution paused for user input.
             </p>
           </div>
         </div>
 
         {/* Question Prompt */}
-        <div className="p-3.5 rounded-lg bg-[#090d16] border border-gray-800 text-sm text-gray-200 leading-relaxed font-sans">
+        <div className="p-3 bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed font-sans rounded-none">
           {prompt.question}
         </div>
 
         {/* User Response Form */}
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-              Your Guidance / Clarification:
+            <label className="block text-xs font-mono font-semibold text-slate-600 uppercase tracking-wider mb-1">
+              Your Input:
             </label>
             <textarea
               value={response}
               onChange={(e) => setResponse(e.target.value)}
-              placeholder="e.g., Focus specifically on the FastAPI auth routers in /api and JWT handling."
+              placeholder="e.g. Focus on auth_service.py"
               rows={3}
-              className="w-full bg-[#090d16] border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+              className="w-full bg-white border border-slate-300 rounded-none px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
               autoFocus
               required
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-1">
             <button
               type="submit"
               disabled={isSubmitting || !response.trim()}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white text-xs font-semibold transition cursor-pointer disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-none bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Resuming...</span>
+                  <span>RESUMING...</span>
                 </>
               ) : (
                 <>
                   <Send className="w-3.5 h-3.5" />
-                  <span>Submit Guidance & Resume</span>
+                  <span>SUBMIT & RESUME</span>
                 </>
               )}
             </button>
@@ -93,4 +92,3 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
     </div>
   );
 };
-

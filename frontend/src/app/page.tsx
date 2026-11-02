@@ -269,7 +269,7 @@ export default function Home() {
   const isInvestigating = state.status === 'RUNNING' || state.status === 'INITIALIZED';
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16]">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
       {/* Top Header */}
       <Header
         currentNode={state.currentNode}
@@ -279,10 +279,10 @@ export default function Home() {
       />
 
       {/* Main Grid Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-5">
         {state.error && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-            <strong>Error:</strong> {state.error}
+          <div className="p-3.5 rounded-none bg-red-50 border border-red-200 text-red-800 text-xs font-mono">
+            <strong>ERROR:</strong> {state.error}
           </div>
         )}
 
