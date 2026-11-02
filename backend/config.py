@@ -20,7 +20,16 @@ GOOGLE_API_KEY = (
     or os.getenv("GEMINI_API_KEY")
     or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY", "")
 )
-LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-3.8-flash")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+
+# Provider selection: "groq" or "gemini". Defaults to "groq" if GROQ_API_KEY is set.
+LLM_PROVIDER = os.getenv(
+    "LLM_PROVIDER",
+    "groq" if GROQ_API_KEY else "gemini"
+).lower()
+
+_default_model = "qwen/qwen3.8-27b" if LLM_PROVIDER == "groq" else "gemini-1.5-flash"
+LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", _default_model)
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 
 # ── Agent Defaults ─────────────────────────────────────────────────────────────

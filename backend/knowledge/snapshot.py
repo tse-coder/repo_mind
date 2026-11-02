@@ -13,6 +13,75 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from backend.config import PROJECT_ROOT
+
+
+def resolve_repo_path(raw_path: str | Path | None) -> Path | None:
+    """
+    Intelligently resolve a raw repository path or folder name to an existing directory Path.
+    Supports:
+    1. Absolute paths (/home/user/project)
+    2. Tilde paths (~/Projects/my-app)
+    3. Relative paths to CWD or PROJECT_ROOT (tests/fixtures/sample_repo)
+    4. Sibling paths in parent directory (../apex-book or apex-book inside ~/Projects)
+    5. Folder name lookup in ~/Projects or PROJECT_ROOT
+    """
+    if raw_path is None:
+        return None
+
+    cleaned = str(raw_path).strip()
+    if not cleaned:
+        return None
+
+    p = Path(cleaned).expanduser()
+
+    # 1. Direct absolute path
+    if p.is_absolute() and p.exists() and p.is_dir():
+        return p.resolve()
+
+    # 2. Relative to CWD
+    cwd_p = (Path.cwd() / p).resolve()
+    if cwd_p.exists() and cwd_p.is_dir():
+        return cwd_p
+
+    # 3. Relative to PROJECT_ROOT
+    root_p = (PROJECT_ROOT / p).resolve()
+    if root_p.exists() and root_p.is_dir():
+        return root_p
+
+    # 4. Relative to PROJECT_ROOT.parent (e.g. sibling folders like ../apex-book)
+    sibling_p = (PROJECT_ROOT.parent / p).resolve()
+    if sibling_p.exists() and sibling_p.is_dir():
+        return sibling_p
+
+    # 5. Relative to User Home
+    home_p = (Path.home() / p).resolve()
+    if home_p.exists() and home_p.is_dir():
+        return home_p
+
+    # 6. Sibling directory match in PROJECT_ROOT.parent / folder_name
+    folder_name = p.name
+    parent_match = PROJECT_ROOT.parent / folder_name
+    if parent_match.exists() and parent_match.is_dir():
+        return parent_match.resolve()
+
+    # 7. Search in ~/Projects / folder_name
+    projects_dir = Path.home() / "Projects"
+    if projects_dir.exists() and projects_dir.is_dir():
+        proj_match = projects_dir / folder_name
+        if proj_match.exists() and proj_match.is_dir():
+            return proj_match.resolve()
+        for match in projects_dir.glob(f"*/{folder_name}"):
+            if match.is_dir() and not any(part.startswith(".") for part in match.parts):
+                return match.resolve()
+
+    # 8. Search for matching directory name inside PROJECT_ROOT
+    for match in PROJECT_ROOT.rglob(folder_name):
+        if match.is_dir() and not any(part.startswith(".") for part in match.parts):
+            return match.resolve()
+
+    return None
+
 
 @dataclass(frozen=True)
 class SnapshotInfo:
@@ -27,9 +96,9 @@ class SnapshotInfo:
 
 def get_snapshot_info(repo_path: str | Path) -> SnapshotInfo:
     """Resolve the snapshot identity for a local path."""
-    path = Path(repo_path).resolve()
-    if not path.exists() or not path.is_dir():
-        raise ValueError(f"Repository path does not exist or is not a directory: {path}")
+    path = resolve_repo_path(repo_path)
+    if not path or not path.exists() or not path.is_dir():
+        raise ValueError(f"Repository path does not exist or is not a directory: {repo_path}")
 
     git_dir = path / ".git"
     if git_dir.exists():

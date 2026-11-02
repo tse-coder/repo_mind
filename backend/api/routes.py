@@ -19,61 +19,9 @@ from backend.api.models import (
     StateResponse,
 )
 from backend.config import PROJECT_ROOT
+from backend.knowledge.snapshot import resolve_repo_path
 
 router = APIRouter(tags=["investigation"])
-
-
-def resolve_repo_path(raw_path: str) -> Optional[Path]:
-    """
-    Intelligently resolve a raw repository path or folder name to an existing directory Path.
-    Supports:
-    1. Absolute paths (/home/user/project)
-    2. Tilde paths (~/Projects/my-app)
-    3. Relative paths to CWD or PROJECT_ROOT (tests/fixtures/sample_repo)
-    4. Base folder names (e.g. 'sample_repo' -> searched in project or ~/Projects)
-    """
-    if not raw_path or not raw_path.strip():
-        return None
-
-    cleaned = raw_path.strip()
-    p = Path(cleaned).expanduser()
-
-    # 1. Direct absolute path
-    if p.is_absolute() and p.exists() and p.is_dir():
-        return p.resolve()
-
-    # 2. Relative to CWD
-    cwd_p = (Path.cwd() / p).resolve()
-    if cwd_p.exists() and cwd_p.is_dir():
-        return cwd_p
-
-    # 3. Relative to PROJECT_ROOT
-    root_p = (PROJECT_ROOT / p).resolve()
-    if root_p.exists() and root_p.is_dir():
-        return root_p
-
-    # 4. Relative to User Home
-    home_p = (Path.home() / p).resolve()
-    if home_p.exists() and home_p.is_dir():
-        return home_p
-
-    # 5. Search for matching directory name inside PROJECT_ROOT
-    folder_name = p.name
-    for match in PROJECT_ROOT.rglob(folder_name):
-        if match.is_dir() and not any(part.startswith(".") for part in match.parts):
-            return match.resolve()
-
-    # 6. Search for matching directory inside ~/Projects
-    projects_dir = Path.home() / "Projects"
-    if projects_dir.exists() and projects_dir.is_dir():
-        proj_match = projects_dir / folder_name
-        if proj_match.exists() and proj_match.is_dir():
-            return proj_match.resolve()
-        for match in projects_dir.glob(f"*/{folder_name}"):
-            if match.is_dir() and not any(part.startswith(".") for part in match.parts):
-                return match.resolve()
-
-    return None
 
 
 @router.get(

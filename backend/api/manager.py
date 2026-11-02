@@ -20,6 +20,7 @@ from langgraph.types import Command
 
 from backend.agent.graph import create_investigation_app
 from backend.config import DEFAULT_MAX_STEPS
+from backend.knowledge.snapshot import resolve_repo_path
 
 logger = logging.getLogger("repomind.manager")
 
@@ -125,8 +126,8 @@ class InvestigationManager:
         max_steps: int | None = None,
     ) -> InvestigationSession:
         """Validate input, mint an investigation ID, and schedule background run."""
-        resolved_path = Path(repo_path).resolve()
-        if not resolved_path.exists():
+        resolved_path = resolve_repo_path(repo_path)
+        if not resolved_path or not resolved_path.exists():
             raise FileNotFoundError(f"Repository path does not exist: {repo_path}")
         if not resolved_path.is_dir():
             raise NotADirectoryError(f"Repository path is not a directory: {repo_path}")
