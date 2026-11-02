@@ -1,36 +1,15 @@
 """
-policy_check_node — Validates tool calls against the Policy Gateway.
-
-Ensures path confinement, tool allowlist, and budget limits.
+policy_check_node — Enforces security, path confinement, and budget limits via PolicyGateway.
 """
 
 from backend.agent.state import InvestigationState
-
-
-# Allowlisted tool slugs
-ALLOWED_TOOLS = frozenset({
-    # Execution tools
-    "explore_tree", "read_file", "search_code",
-    "search_symbols", "get_symbol", "find_references",
-    "get_relationships", "trace_calls", "semantic_search", "get_history",
-    # Meta-tools
-    "update_plan", "record_finding", "reflect_on_findings", "request_clarification",
-})
+from backend.policy.gateway import PolicyGateway
 
 
 def policy_check_node(state: InvestigationState) -> dict:
-    """Validate the proposed tool call against policy rules.
-
-    Checks:
-    1. Tool slug is in the allowlist.
-    2. Budget (step_count) has not been exceeded.
-
-    Full path confinement and secret redaction are added in Phase 3.
-
-    Returns the tool call unchanged if valid, or marks it as POLICY_DENIED.
-    """
-    tool_call = state["current_tool_call"]
-    if tool_call is None:
+    """Validate the proposed tool call against PolicyGateway rules."""
+    tool_call = state.get("current_tool_call")
+    if not tool_call:
         return {
             "current_tool_call": {
                 "tool_slug": "none",
@@ -41,32 +20,30 @@ def policy_check_node(state: InvestigationState) -> dict:
             }
         }
 
+    gateway = PolicyGateway(repo_path=state["repo_path"])
     tool_slug = tool_call.get("tool_slug", "")
+    arguments = tool_call.get("arguments", {})
 
-    # Check allowlist
-    if tool_slug not in ALLOWED_TOOLS:
+    check_result = gateway.validate(
+        tool_slug=tool_slug,
+        arguments=arguments,
+        step_count=state.get("step_count", 0),
+        max_steps=state.get("max_steps", 25),
+    )
+
+    if not check_result.allowed:
         return {
             "current_tool_call": {
                 **tool_call,
                 "policy_status": "DENIED",
-                "denial_reason": f"Tool '{tool_slug}' is not in the allowlist.",
+                "denial_reason": check_result.reason,
             }
         }
 
-    # Check budget
-    if state["step_count"] > state["max_steps"]:
-        return {
-            "current_tool_call": {
-                **tool_call,
-                "policy_status": "DENIED",
-                "denial_reason": "Step budget exhausted.",
-            }
-        }
-
-    # Approved
     return {
         "current_tool_call": {
             **tool_call,
+            "arguments": check_result.sanitized_args or arguments,
             "policy_status": "APPROVED",
         }
     }
