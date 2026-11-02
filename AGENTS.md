@@ -61,8 +61,8 @@ for event in app.stream(inputs, config={'configurable': {'thread_id': 's1'}}):
 | **Phase 3** | Policy Gateway (path sandboxing, allowlist, secret redaction, framing) | ✅ Complete | 6/6 policy tests passed |
 | **Phase 4** | Gemini LLM integration, structured Pydantic schemas, fast observe extraction | ✅ Complete | 30/30 unit tests passed |
 | **Phase 5** | FastAPI Backend & SSE streaming endpoints | ✅ Complete | 10/10 integration tests passed |
-| **Phase 6** | Next.js / React User Interface | ⏳ **Next to build** | — |
-| **Phase 7** | Evaluation Harness, 5 Adversarial Scenarios, Capstone Report | ⏳ Pending | — |
+| **Phase 6** | Next.js / React User Interface | ✅ Complete | Production build verified (`next build`) |
+| **Phase 7** | Evaluation Harness, 5 Adversarial Scenarios, Capstone Report | ⏳ **Next to build** | — |
 
 ---
 
@@ -186,7 +186,7 @@ agentic-ai-project/
 
 ---
 
-### Phase 6 — Next.js / React User Interface (⏳ Next to Build)
+### Phase 6 — Next.js / React User Interface (✅ Complete)
 
 **Goal:** Interactive browser-based dashboard for exploring repositories with the agent.
 
@@ -200,7 +200,7 @@ agentic-ai-project/
 
 ---
 
-### Phase 7 — Evaluation, Adversarial Testing & Capstone Report (⏳ Pending)
+### Phase 7 — Evaluation, Adversarial Testing & Capstone Report (⏳ Next to Build)
 
 **Goal:** Fulfill the capstone deliverables from Slides 22 & 23.
 
@@ -243,4 +243,4 @@ flowchart LR
     P7 --> P8["Phase 8\nPolish"]
 ```
 
-> **Current status:** Phases 0 through 5 are **Complete**. Start directly with **Phase 6 (Next.js / React User Interface)**.
+> **Current status:** Phases 0 through 6 are **Complete**. Start directly with **Phase 7 (Evaluation, Adversarial Testing & Capstone Report)**.

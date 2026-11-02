@@ -7,7 +7,7 @@ dev-backend:
 	uv run uvicorn backend.main:app --reload --port 8000
 
 dev-frontend:
-	cd frontend && npm run dev
+	cd frontend && (pnpm run dev || npm run dev)
 
 test:
 	uv run pytest -v
