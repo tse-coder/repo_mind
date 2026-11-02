@@ -3,7 +3,13 @@ Unit tests for LangGraph conditional edge routing functions and evaluate_node lo
 """
 
 import pytest
-from backend.agent.graph import route_classify, route_policy, route_evaluate, route_verify
+from backend.agent.graph import (
+    route_classify,
+    route_select_action,
+    route_policy,
+    route_evaluate,
+    route_verify,
+)
 from backend.agent.nodes.evaluate import evaluate_node
 
 
@@ -15,6 +21,16 @@ def test_route_classify_when_needs_clarification():
 def test_route_classify_normal():
     state = {"needs_clarification": False}
     assert route_classify(state) == "plan"
+
+
+def test_route_select_action_policy_check():
+    state = {"next_route": "select_action", "current_tool_call": {"tool_slug": "read_file"}}
+    assert route_select_action(state) == "policy_check"
+
+
+def test_route_select_action_synthesize():
+    state = {"next_route": "synthesize", "current_tool_call": None}
+    assert route_select_action(state) == "synthesize"
 
 
 def test_route_policy_approved():

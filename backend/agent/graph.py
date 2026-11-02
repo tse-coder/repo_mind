@@ -35,6 +35,13 @@ def route_classify(state: InvestigationState) -> Literal["clarify", "plan"]:
     return "plan"
 
 
+def route_select_action(state: InvestigationState) -> Literal["policy_check", "synthesize"]:
+    """Route after action selection: proceed to policy check, or straight to synthesis if finished."""
+    if state.get("next_route") == "synthesize" or not state.get("current_tool_call"):
+        return "synthesize"
+    return "policy_check"
+
+
 def route_policy(state: InvestigationState) -> Literal["execute_tool", "observe"]:
     """Route after policy check: proceed to execution if approved, else observe error."""
     tool_call = state.get("current_tool_call") or {}
@@ -90,7 +97,6 @@ def build_investigation_graph():
     workflow.add_edge("intake", "classify")
     workflow.add_edge("clarify", "plan")
     workflow.add_edge("plan", "select_action")
-    workflow.add_edge("select_action", "policy_check")
     workflow.add_edge("execute_tool", "observe")
     workflow.add_edge("observe", "evaluate")
     workflow.add_edge("reflect", "select_action")
@@ -105,6 +111,15 @@ def build_investigation_graph():
         {
             "clarify": "clarify",
             "plan": "plan",
+        },
+    )
+
+    workflow.add_conditional_edges(
+        "select_action",
+        route_select_action,
+        {
+            "policy_check": "policy_check",
+            "synthesize": "synthesize",
         },
     )
 

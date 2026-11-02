@@ -1,43 +1,45 @@
 """
-answer_node — Produces the final formatted answer with citations and confidence labels.
+answer_node — Produces the final delivered response with confidence labels and metadata.
 """
+
+from __future__ import annotations
 
 from backend.agent.state import InvestigationState
 
 
 def answer_node(state: InvestigationState) -> dict:
-    """Finalize the answer with confidence labels and limitations.
-
-    Takes the (optionally verified) draft and appends metadata:
-    - Confidence labels per finding
-    - Limitations section
-    - Investigation summary
-    """
+    """Format final output with citations, limitations, and confidence rating."""
     draft = state.get("draft_answer", "")
     limitations = state.get("limitations", [])
     status = state.get("status", "SUFFICIENT")
     step_count = state.get("step_count", 0)
     evidence_count = len(state.get("evidence_store", []))
-    finding_count = len(state.get("findings", []))
+    findings = state.get("findings", [])
 
-    # Build the final answer
-    sections = [draft]
+    sections = [draft.strip()]
 
-    # Limitations
+    # Findings confidence breakdown
+    if findings:
+        conf_lines = ["\n### Finding Confidence Ratings"]
+        for f in findings:
+            badge = "🟢 CONFIRMED" if f["confidence"] == "CONFIRMED" else "🟡 INFERRED"
+            conf_lines.append(f"- **{badge}**: {f['claim']}")
+        sections.append("\n".join(conf_lines))
+
+    # Limitations & caveats
     if limitations:
-        lim_text = "\n".join(f"- {lim}" for lim in limitations)
-        sections.append(f"\n### Limitations\n{lim_text}")
+        lim_lines = ["\n### Limitations & Gaps"]
+        for lim in limitations:
+            lim_lines.append(f"- {lim}")
+        sections.append("\n".join(lim_lines))
 
-    # Investigation metadata
+    # Meta summary
     sections.append(
-        f"\n---\n*Investigation completed with status: **{status}** "
-        f"| Steps: {step_count} | Evidence items: {evidence_count} "
-        f"| Findings: {finding_count}*"
+        f"\n---\n*Investigation completed with status: **{status}** | "
+        f"Steps executed: {step_count} | Evidence citations: {evidence_count}*"
     )
 
-    final_answer = "\n".join(sections)
-
     return {
-        "final_answer": final_answer,
-        "status": status if status in ("SUFFICIENT", "PARTIAL") else "SUFFICIENT",
+        "final_answer": "\n\n".join(sections),
+        "status": status,
     }

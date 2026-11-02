@@ -14,12 +14,16 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 LOGS_DIR.mkdir(exist_ok=True)
 
 # ── LLM ────────────────────────────────────────────────────────────────────────
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-2.5-flash")
+GOOGLE_API_KEY = (
+    os.getenv("GOOGLE_API_KEY")
+    or os.getenv("GEMINI_API_KEY")
+    or os.getenv("GOOGLE_GENERATIVE_AI_API_KEY", "")
+)
+LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-3.8-flash")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 
 # ── Agent Defaults ─────────────────────────────────────────────────────────────
-DEFAULT_MAX_STEPS = int(os.getenv("DEFAULT_MAX_STEPS", "25"))
+DEFAULT_MAX_STEPS = int(os.getenv("DEFAULT_MAX_STEPS", "5"))
 DEFAULT_MAX_CLARIFICATIONS = int(os.getenv("DEFAULT_MAX_CLARIFICATIONS", "2"))
 MAX_RETRIES_PER_STRATEGY = 2
 READ_FILE_MAX_LINES = 200

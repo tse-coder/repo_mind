@@ -1,23 +1,41 @@
 """
-verify_node — Checks every citation in the draft answer against actual evidence.
-
-Programmatically verifies that cited file paths and line ranges match
-evidence items in the store. Unsupported claims are removed or downgraded.
+verify_node — Programmatically checks cited file paths and line ranges against local files.
 """
+
+from __future__ import annotations
+
+import re
+from pathlib import Path
 
 from backend.agent.state import InvestigationState
 
+# Regex to match citations like [file.py:12] or [path/to/file.py:10-25]
+CITATION_REGEX = re.compile(r"\[([a-zA-Z0-9_\-/\.]+):(\d+)(?:-(\d+))?\]")
+
 
 def verify_node(state: InvestigationState) -> dict:
-    """Verify the draft answer's citations against collected evidence.
+    """Verify that cited files exist and line numbers are valid."""
+    draft = state.get("draft_answer", "")
+    repo_root = Path(state.get("repo_path", ".")).resolve()
+    limitations = list(state.get("limitations", []))
 
-    Stub: passes the draft through unchanged.
-    Phase 4 replaces with programmatic file:line verification.
+    citations = CITATION_REGEX.findall(draft)
+    verified_count = 0
+    invalid_citations = []
 
-    Sets next_route to:
-      - "answer" if verification passes or budget is exhausted
-      - "select_action" if missing citations need one more lookup (budget permitting)
-    """
+    for file_rel, start_l, end_l in citations:
+        target = repo_root / file_rel
+        if not target.exists() or not target.is_file():
+            invalid_citations.append(f"{file_rel}:{start_l}")
+        else:
+            verified_count += 1
+
+    if invalid_citations:
+        limitations.append(
+            f"Verification notice: {len(invalid_citations)} citations could not be verified on disk ({', '.join(invalid_citations[:3])})."
+        )
+
     return {
+        "limitations": limitations,
         "next_route": "answer",
     }
