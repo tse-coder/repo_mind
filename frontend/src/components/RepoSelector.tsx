@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Folder,
   Search,
@@ -8,6 +8,8 @@ import {
   Sliders,
   Play,
   Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 interface RepoSelectorProps {
@@ -31,28 +33,73 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
   const [repoPath, setRepoPath] = useState('tests/fixtures/sample_repo');
   const [query, setQuery] = useState('Where is the login handler and authentication logic defined?');
   const [maxSteps, setMaxSteps] = useState(5);
+  const [resolvedInfo, setResolvedInfo] = useState<{
+    exists: boolean;
+    resolved_path?: string;
+  } | null>(null);
+
+  // Debounced auto-resolution check against backend
+  useEffect(() => {
+    if (!repoPath.trim()) {
+      setResolvedInfo(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/resolve-path?path=${encodeURIComponent(repoPath.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setResolvedInfo({
+            exists: data.exists,
+            resolved_path: data.resolved_path,
+          });
+        }
+      } catch {
+        setResolvedInfo(null);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [repoPath]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!repoPath.trim() || !query.trim() || isLoading) return;
-    onStart(repoPath.trim(), query.trim(), maxSteps);
+    const targetPath = resolvedInfo?.resolved_path || repoPath.trim();
+    if (!targetPath || !query.trim() || isLoading) return;
+    onStart(targetPath, query.trim(), maxSteps);
   };
 
-  const handleFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFolderSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const firstFile = files[0] as any;
-    // In Chromium / desktop environments, firstFile.path provides the full filesystem path
+    let candidate = '';
+    // Chromium / desktop environment exposes the full filesystem path
     if (firstFile.path) {
       const fullPath = firstFile.path;
-      const dirPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
-      setRepoPath(dirPath || fullPath);
+      candidate = fullPath.substring(0, fullPath.lastIndexOf('/')) || fullPath;
     } else if (firstFile.webkitRelativePath) {
-      // In browsers that only provide the relative path, get root folder name
-      const rootFolder = firstFile.webkitRelativePath.split('/')[0];
-      setRepoPath(rootFolder);
+      // Browsers standard sandbox only gives the root folder name
+      candidate = firstFile.webkitRelativePath.split('/')[0];
     }
+
+    if (!candidate) return;
+
+    // Immediately resolve candidate via backend to get the exact absolute path on device
+    try {
+      const res = await fetch(`/api/resolve-path?path=${encodeURIComponent(candidate)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.exists && data.resolved_path) {
+          setRepoPath(data.resolved_path);
+          setResolvedInfo({ exists: true, resolved_path: data.resolved_path });
+          return;
+        }
+      }
+    } catch {}
+
+    setRepoPath(candidate);
   };
 
   return (
@@ -90,6 +137,34 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
                 required
               />
             </div>
+
+            {/* Live Path Resolution Feedback */}
+            {resolvedInfo && (
+              <div className="text-[11px] font-mono px-2 py-1 rounded bg-black/40 border border-gray-800/80">
+                {resolvedInfo.exists ? (
+                  <div className="flex items-center justify-between text-emerald-400">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-gray-400">Resolved:</span> {resolvedInfo.resolved_path}
+                    </span>
+                    {resolvedInfo.resolved_path !== repoPath && (
+                      <button
+                        type="button"
+                        onClick={() => setRepoPath(resolvedInfo.resolved_path || repoPath)}
+                        className="text-[10px] text-blue-400 underline ml-2 shrink-0 hover:text-blue-300"
+                      >
+                        Use Absolute
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-amber-400">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Path not found on host. Check path or use absolute directory path.</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick path chips */}
@@ -166,7 +241,7 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
 
           <button
             type="submit"
-            disabled={isLoading || !repoPath.trim() || !query.trim()}
+            disabled={isLoading || !repoPath.trim() || !query.trim() || (resolvedInfo !== null && !resolvedInfo.exists)}
             className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white text-sm font-semibold shadow-lg shadow-blue-600/20 transition cursor-pointer disabled:cursor-not-allowed"
           >
             {isLoading ? (

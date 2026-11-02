@@ -38,6 +38,23 @@ async def test_health_check():
 
 
 @pytest.mark.asyncio
+async def test_resolve_path_endpoint():
+    """Verify GET /api/resolve-path resolves relative folder names to absolute paths."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        res = await client.get("/api/resolve-path?path=sample_repo")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["exists"] is True
+        assert data["resolved_path"].endswith("tests/fixtures/sample_repo")
+
+        # Non-existent path
+        res_nonexistent = await client.get("/api/resolve-path?path=nonexistent_xyz_dir_999")
+        assert res_nonexistent.status_code == 200
+        assert res_nonexistent.json()["exists"] is False
+
+
+@pytest.mark.asyncio
 async def test_investigate_validation_nonexistent_path():
     """Verify POST /api/investigate returns 400 when repository directory does not exist."""
     transport = ASGITransport(app=app)
