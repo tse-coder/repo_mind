@@ -28,10 +28,6 @@ class ToolDecision(BaseModel):
         "trace_calls",
         "semantic_search",
         "get_history",
-        "extract_api_contracts",
-        "extract_data_models",
-        "trace_data_flow",
-        "map_architecture_layers",
         "finish",
     ] = Field(
         default="explore_tree",
@@ -99,17 +95,9 @@ Available Execution Tools:
 8. `trace_calls`: entry_symbol (required), depth (default 3)
 9. `semantic_search`: query (natural language concept), k (default 5)
 10. `get_history`: file_path, max_commits (default 5)
-11. `extract_api_contracts`: (no required args) - discovers HTTP routes, methods, handlers, request/response models
-12. `extract_data_models`: (no required args) - discovers ORM models (Pydantic/SQLAlchemy/Prisma), fields, foreign keys
-13. `trace_data_flow`: entry_symbol (required) - traces chronological execution sequence from an entrypoint
-14. `map_architecture_layers`: (no required args) - clusters modules into architectural tiers (Presentation, Domain, Persistence)
-15. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
+11. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
 
 Investigation Guidelines & Strict Rules:
-- When the query is about system architecture or high-level layers, IMMEDIATELY call `map_architecture_layers`.
-- When the query is about request flow, lifecycle, or execution sequence, call `trace_data_flow` with the entrypoint symbol.
-- When the query is about database schema, tables, or data models, call `extract_data_models`.
-- When the query is about API endpoints, routes, or contracts, call `extract_api_contracts`.
 - NEVER repeat the exact same tool call with identical arguments as a previous step.
 - DO NOT search for the repository name itself (e.g. searching 'apex-book' inside apex-book repo). Search for technical concepts, identifiers, function names, classes, or keywords from the user question.
 - If a lexical search or symbol search returned 0 matches, DO NOT try the exact same query again. Use `explore_tree` to find relevant source directories, check `README.md`, or try `semantic_search`.

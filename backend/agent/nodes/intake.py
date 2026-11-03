@@ -44,13 +44,10 @@ def intake_node(state: InvestigationState) -> dict:
     return {
         "investigation_id": f"inv_{uuid.uuid4().hex[:8]}",
         "commit_sha": commit_sha,
-        "artifact_type": None,
         "query_type": "",
         "entities": [],
         "needs_clarification": False,
         "evidence_slots": {},
-        "contracts_store": [],
-        "models_store": [],
         "plan": [],
         "plan_version": 0,
         "current_goal_id": None,

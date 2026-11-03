@@ -35,10 +35,6 @@ ALLOWED_TOOL_SLUGS = frozenset({
     "trace_calls",
     "semantic_search",
     "get_history",
-    "extract_api_contracts",
-    "extract_data_models",
-    "trace_data_flow",
-    "map_architecture_layers",
     # Meta tools
     "update_plan",
     "record_finding",
