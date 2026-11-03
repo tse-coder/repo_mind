@@ -16,21 +16,9 @@ interface RepoSelectorProps {
   isLoading: boolean;
 }
 
-const QUICK_PATHS = [
-  { label: 'Sample Auth Repo', path: 'tests/fixtures/sample_repo' },
-  { label: 'RepoMind Engine', path: '.' },
-];
-
-const EXAMPLE_QUERIES = [
-  'Where is the login handler and authentication logic defined?',
-  'Trace how requests flow from auth router to user model.',
-  'What security policies and sandbox protections are enforced?',
-  'Where are secrets redacted before entering LLM context?',
-];
-
 export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }) => {
-  const [repoPath, setRepoPath] = useState('tests/fixtures/sample_repo');
-  const [query, setQuery] = useState('Where is the login handler and authentication logic defined?');
+  const [repoPath, setRepoPath] = useState('');
+  const [query, setQuery] = useState('');
   const [maxSteps, setMaxSteps] = useState(15);
   const [resolvedInfo, setResolvedInfo] = useState<{
     exists: boolean;
@@ -120,63 +108,24 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
               className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-mono file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer bg-slate-50 border border-slate-300 rounded-none p-1.5 focus:outline-none focus:border-slate-800"
             />
 
-            {/* Editable path input showing current or selected path */}
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-500 font-mono shrink-0">Path:</span>
-              <input
-                type="text"
-                value={repoPath}
-                onChange={(e) => setRepoPath(e.target.value)}
-                placeholder="/absolute/path/to/repository or relative path"
-                className="flex-1 bg-white border border-slate-300 rounded-none px-3 py-1.5 text-xs text-slate-900 font-mono focus:outline-none focus:border-slate-800"
-                disabled={isLoading}
-                required
-              />
-            </div>
-
             {/* Live Path Resolution Feedback */}
             {resolvedInfo && (
               <div className="text-[11px] font-mono px-2 py-1 bg-slate-50 border border-slate-200 rounded-none">
                 {resolvedInfo.exists ? (
-                  <div className="flex items-center justify-between text-emerald-700">
+                  <div className="flex items-center text-emerald-700">
                     <span className="flex items-center gap-1.5 truncate">
                       <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
-                      <span className="text-slate-500">Verified:</span> {resolvedInfo.resolved_path}
+                      <span className="text-slate-500">Selected:</span> {resolvedInfo.resolved_path}
                     </span>
-                    {resolvedInfo.resolved_path !== repoPath && (
-                      <button
-                        type="button"
-                        onClick={() => setRepoPath(resolvedInfo.resolved_path || repoPath)}
-                        className="text-[10px] text-blue-600 underline ml-2 shrink-0 hover:text-blue-800"
-                      >
-                        Use Absolute
-                      </button>
-                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 text-amber-700">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-                    <span>Path not found. Verify directory exists.</span>
+                    <span>Directory not found on local filesystem.</span>
                   </div>
                 )}
               </div>
             )}
-          </div>
-
-          {/* Quick path chips */}
-          <div className="flex items-center gap-1.5 mt-2">
-            <span className="text-[11px] text-slate-400 font-mono">Quick:</span>
-            {QUICK_PATHS.map((item) => (
-              <button
-                key={item.path}
-                type="button"
-                onClick={() => setRepoPath(item.path)}
-                className="text-[11px] font-mono px-2 py-0.5 rounded-none bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
-                disabled={isLoading}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -190,29 +139,11 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter question about repository structure, flows, or symbols..."
-            rows={2}
+            rows={3}
             className="w-full bg-white border border-slate-300 rounded-none px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
             disabled={isLoading}
             required
           />
-          {/* Example query chips */}
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
-            <span className="text-[11px] text-slate-400 font-mono">
-              Templates:
-            </span>
-            {EXAMPLE_QUERIES.map((q, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setQuery(q)}
-                className="text-[11px] px-2 py-0.5 rounded-none bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition truncate max-w-[280px]"
-                disabled={isLoading}
-                title={q}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Controls Row */}
