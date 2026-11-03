@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Terminal, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle, ShieldAlert } from 'lucide-react';
 import { ToolCallItem, ReflectionItem } from '../types';
+import { ToolOutputViewer } from './ToolOutputViewer';
 
 interface ToolActivityFeedProps {
   toolCalls: ToolCallItem[];
@@ -131,14 +132,7 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
 
                     {/* Output / Summary */}
                     {tc.summary && (
-                      <div>
-                        <span className="text-slate-500 font-mono text-[11px] block mb-0.5">
-                          Output:
-                        </span>
-                        <pre className="p-2.5 rounded-none bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-100 overflow-x-auto max-h-48 whitespace-pre-wrap">
-                          {tc.summary}
-                        </pre>
-                      </div>
+                      <ToolOutputViewer tool={tc.tool} summary={tc.summary} />
                     )}
                   </div>
                 )}

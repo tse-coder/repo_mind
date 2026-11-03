@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, ShieldCheck, AlertCircle, Copy, Check } from 'lucide-react';
+import { FileText, ShieldCheck, AlertCircle, Copy, Check, Eye, Code } from 'lucide-react';
 import { FindingItem } from '../types';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface AnswerViewProps {
   answer?: string;
@@ -20,6 +21,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
   status,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState<'preview' | 'raw'>('preview');
 
   const displayText = answer || (streamingTokens.length > 0 ? streamingTokens.join('') : '');
 
@@ -41,23 +43,55 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
           </h2>
         </div>
         {displayText && (
-          <button
-            type="button"
-            onClick={copyAnswer}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-slate-100 hover:bg-slate-200 text-xs font-mono text-slate-700 border border-slate-300 transition"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Copied</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span>Copy</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle: Preview / Raw */}
+            <div className="inline-flex border border-slate-300 rounded-none bg-slate-100 p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode('preview')}
+                className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition ${
+                  viewMode === 'preview'
+                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Render formatted Markdown"
+              >
+                <Eye className="w-3 h-3" />
+                <span>Preview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('raw')}
+                className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition ${
+                  viewMode === 'raw'
+                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="View raw Markdown source"
+              >
+                <Code className="w-3 h-3" />
+                <span>Raw</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={copyAnswer}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-slate-100 hover:bg-slate-200 text-xs font-mono text-slate-700 border border-slate-300 transition"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
         )}
       </div>
 
@@ -69,9 +103,15 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Answer Text */}
-          <div className="p-4 rounded-none bg-slate-50 border border-slate-200 text-sm text-slate-900 font-sans leading-relaxed whitespace-pre-wrap">
-            {displayText}
+          {/* Answer Content */}
+          <div className="p-4 rounded-none bg-slate-50 border border-slate-200 text-sm text-slate-900 font-sans leading-relaxed">
+            {viewMode === 'preview' ? (
+              <MarkdownRenderer content={displayText} />
+            ) : (
+              <pre className="p-3 bg-slate-900 text-slate-100 font-mono text-xs whitespace-pre-wrap overflow-x-auto rounded-none border border-slate-800">
+                {displayText}
+              </pre>
+            )}
           </div>
 
           {/* Finding Confidence Ratings */}

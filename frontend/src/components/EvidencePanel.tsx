@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { BookOpen, FileCode, Hash, Check, Copy } from 'lucide-react';
 import { EvidenceItem, FindingItem } from '../types';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface EvidencePanelProps {
   evidenceStore: EvidenceItem[];
@@ -115,9 +116,15 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({ evidenceStore, fin
               {/* Snippet preview */}
               {ev.snippet && (
                 <div className="relative">
-                  <pre className="p-2 rounded-none bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-100 overflow-x-auto max-h-24 whitespace-pre-wrap">
-                    {ev.snippet}
-                  </pre>
+                  {ev.file_path && ev.file_path.endsWith('.md') ? (
+                    <div className="p-2.5 rounded-none bg-white border border-slate-200 text-xs max-h-36 overflow-y-auto">
+                      <MarkdownRenderer content={ev.snippet} />
+                    </div>
+                  ) : (
+                    <pre className="p-2 rounded-none bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-100 overflow-x-auto max-h-24 whitespace-pre-wrap">
+                      {ev.snippet}
+                    </pre>
+                  )}
                   <button
                     type="button"
                     onClick={() => copyToClipboard(ev.snippet, ev.id)}
