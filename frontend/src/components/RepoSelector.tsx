@@ -31,7 +31,7 @@ const EXAMPLE_QUERIES = [
 export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }) => {
   const [repoPath, setRepoPath] = useState('tests/fixtures/sample_repo');
   const [query, setQuery] = useState('Where is the login handler and authentication logic defined?');
-  const [maxSteps, setMaxSteps] = useState(5);
+  const [maxSteps, setMaxSteps] = useState(15);
   const [resolvedInfo, setResolvedInfo] = useState<{
     exists: boolean;
     resolved_path?: string;
@@ -223,8 +223,9 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
             </span>
             <input
               type="range"
-              min="1"
-              max="20"
+              min="5"
+              max="40"
+              step="5"
               value={maxSteps}
               onChange={(e) => setMaxSteps(parseInt(e.target.value, 10))}
               className="w-28 accent-slate-900 cursor-pointer"

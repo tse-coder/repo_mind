@@ -6,10 +6,11 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.agent.llm import get_llm
 from backend.agent.state import InvestigationState
+from backend.config import LLM_PROVIDER
 
 
 class QueryClassification(BaseModel):
@@ -35,6 +36,42 @@ class QueryClassification(BaseModel):
         description="List of specific sub-questions or facts that must be discovered (e.g. ['entrypoint', 'validation_logic', 'database_call']).",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_input(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+
+        for key in ("QueryClassification", "classification"):
+            if key in data and isinstance(data[key], dict):
+                data = data[key]
+                break
+
+        # Normalize query_type to uppercase and map common aliases
+        q_type = str(data.get("query_type", "LOCATE")).upper().strip()
+        valid_types = {"LOCATE", "TRACE_FLOW", "ARCHITECTURE", "DEPENDENCY", "ERROR_ORIGIN", "MIXED"}
+        if q_type not in valid_types:
+            if "TRACE" in q_type or "FLOW" in q_type:
+                q_type = "TRACE_FLOW"
+            elif "ARCH" in q_type:
+                q_type = "ARCHITECTURE"
+            elif "DEP" in q_type or "IMPORT" in q_type:
+                q_type = "DEPENDENCY"
+            elif "ERR" in q_type or "BUG" in q_type:
+                q_type = "ERROR_ORIGIN"
+            else:
+                q_type = "LOCATE"
+        data["query_type"] = q_type
+
+        # Normalize evidence_slots
+        if "evidence_slots" not in data:
+            for alias in ("slots", "sub_questions", "facts", "evidence"):
+                if alias in data and isinstance(data[alias], list):
+                    data["evidence_slots"] = data[alias]
+                    break
+
+        return data
+
 
 CLASSIFY_PROMPT = """You are an expert software engineer analyzing a user question about a codebase.
 Categorize the question, extract referenced symbols/files/modules, and decompose the question into 1 to 4 concrete evidence slots (facts or code locations required to answer).
@@ -48,6 +85,7 @@ Question types:
 - MIXED: Combination of the above.
 
 Only mark needs_clarification=True if the query is fundamentally unanswerable without user disambiguation (e.g. 'how does it work' with no feature named).
+Return your response strictly as a JSON object adhering to the schema.
 """
 
 
@@ -55,7 +93,11 @@ def classify_node(state: InvestigationState) -> dict:
     """Classify the user query and populate evidence slots."""
     query = state.get("query", "")
     llm = get_llm(temperature=0.0)
-    structured_llm = llm.with_structured_output(QueryClassification)
+    structured_llm = (
+        llm.with_structured_output(QueryClassification, method="json_mode")
+        if LLM_PROVIDER == "groq"
+        else llm.with_structured_output(QueryClassification)
+    )
 
     try:
         result: QueryClassification = structured_llm.invoke([

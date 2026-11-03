@@ -34,7 +34,7 @@ def _create_groq_llm(temperature: float, model: str | None = None) -> BaseChatMo
     target_model = model or (
         LLM_MODEL_NAME
         if any(kw in LLM_MODEL_NAME.lower() for kw in ("llama", "qwen", "openai", "gpt", "mixtral", "gemma"))
-        else "qwen/qwen3.8-27b"
+        else "openai/gpt-oss-120b"
     )
     return ChatGroq(
         model=target_model,

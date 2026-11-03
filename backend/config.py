@@ -28,12 +28,12 @@ LLM_PROVIDER = os.getenv(
     "groq" if GROQ_API_KEY else "gemini"
 ).lower()
 
-_default_model = "qwen/qwen3.8-27b" if LLM_PROVIDER == "groq" else "gemini-1.5-flash"
+_default_model = "openai/gpt-oss-120b" if LLM_PROVIDER == "groq" else "gemini-1.5-flash"
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", _default_model)
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 
 # ── Agent Defaults ─────────────────────────────────────────────────────────────
-DEFAULT_MAX_STEPS = int(os.getenv("DEFAULT_MAX_STEPS", "5"))
+DEFAULT_MAX_STEPS = int(os.getenv("DEFAULT_MAX_STEPS", "20"))
 DEFAULT_MAX_CLARIFICATIONS = int(os.getenv("DEFAULT_MAX_CLARIFICATIONS", "2"))
 MAX_RETRIES_PER_STRATEGY = 2
 READ_FILE_MAX_LINES = 200

@@ -6,26 +6,63 @@ from __future__ import annotations
 
 import uuid
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.agent.llm import get_llm
 from backend.agent.state import InvestigationState, PlanGoal
+from backend.config import LLM_PROVIDER
 
 
 class PlannedGoalItem(BaseModel):
     description: str = Field(description="Actionable goal statement for this investigation step.")
-    evidence_slot: str = Field(description="The evidence slot this goal will help satisfy.")
+    evidence_slot: str = Field(default="primary_answer", description="The evidence slot this goal will help satisfy.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_input(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return {"description": str(data), "evidence_slot": "primary_answer"}
+        if "description" not in data:
+            for alias in ("goal", "title", "name", "action", "step"):
+                if alias in data and isinstance(data[alias], str):
+                    data["description"] = data[alias]
+                    break
+        if "evidence_slot" not in data:
+            for alias in ("slot", "target_slot", "slot_id"):
+                if alias in data and isinstance(data[alias], str):
+                    data["evidence_slot"] = data[alias]
+                    break
+            if "evidence_slot" not in data:
+                data["evidence_slot"] = "primary_answer"
+        return data
 
 
 class PlanProposal(BaseModel):
-    goals: list[PlannedGoalItem] = Field(description="Ordered list of investigation sub-goals.")
+    goals: list[PlannedGoalItem] = Field(default_factory=list, description="Ordered list of investigation sub-goals.")
     revision_reason: str = Field(default="", description="If revising an existing plan, explanation of why.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_input(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        for key in ("PlanProposal", "proposal"):
+            if key in data and isinstance(data[key], dict):
+                data = data[key]
+                break
+        if "goals" not in data:
+            for alias in ("plan", "steps", "subgoals", "sub_goals", "items"):
+                if alias in data and isinstance(data[alias], list):
+                    data["goals"] = data[alias]
+                    break
+        return data
 
 
 PLAN_PROMPT = """You are a software investigation planner.
 Based on the user's question, query type, and open evidence slots, generate a concise, ordered list of 1 to 4 investigation goals.
 Each goal should be tied to an open evidence slot.
 Focus on finding concrete code definitions, usages, or flow steps using read-only tools.
+Return your proposal strictly as a JSON object adhering to the PlanProposal schema.
 """
 
 
@@ -56,7 +93,11 @@ def plan_node(state: InvestigationState) -> dict:
         }
 
     llm = get_llm(temperature=0.0)
-    structured_llm = llm.with_structured_output(PlanProposal)
+    structured_llm = (
+        llm.with_structured_output(PlanProposal, method="json_mode")
+        if LLM_PROVIDER == "groq"
+        else llm.with_structured_output(PlanProposal)
+    )
 
     prompt_context = f"""
 Query: {query}

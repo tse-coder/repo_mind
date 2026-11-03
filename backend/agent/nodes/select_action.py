@@ -4,12 +4,16 @@ select_action_node — Chooses the next read-only tool to execute with a 1-sente
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.agent.llm import get_llm
 from backend.agent.state import InvestigationState
+from backend.config import LLM_PROVIDER
+
+logger = logging.getLogger("repomind.action")
 
 
 class ToolDecision(BaseModel):
@@ -25,19 +29,63 @@ class ToolDecision(BaseModel):
         "semantic_search",
         "get_history",
         "finish",
-    ] = Field(description="The tool to execute next, or 'finish' if sufficient evidence is already gathered.")
+    ] = Field(
+        default="explore_tree",
+        description="The tool to execute next, or 'finish' if sufficient evidence is already gathered.",
+    )
     arguments: dict[str, Any] = Field(
         default_factory=dict,
         description="Arguments strictly adhering to the selected tool schema.",
     )
-    rationale: str = Field(description="A concise 1-sentence explanation of why this specific action is being taken.")
+    rationale: str = Field(
+        default="Investigating repository to gather factual evidence.",
+        description="A concise 1-sentence explanation of why this specific action is being taken.",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_input(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+
+        # Check for nested envelopes like {"ToolDecision": {...}} or {"tool": {...}}
+        for key in ("ToolDecision", "tool_decision", "action", "decision"):
+            if key in data and isinstance(data[key], dict):
+                data = data[key]
+                break
+
+        # Map function / name / tool to tool_slug
+        if "tool_slug" not in data:
+            for alias in ("function", "name", "tool", "tool_name", "action", "selected_tool"):
+                if alias in data and isinstance(data[alias], str):
+                    data["tool_slug"] = data[alias]
+                    break
+
+        # Normalize arguments
+        if "arguments" not in data:
+            for alias in ("args", "parameters", "params", "input"):
+                if alias in data and isinstance(data[alias], dict):
+                    data["arguments"] = data[alias]
+                    break
+
+        # Normalize rationale
+        if "rationale" not in data or not data["rationale"]:
+            for alias in ("reason", "thought", "explanation", "justification"):
+                if alias in data and isinstance(data[alias], str):
+                    data["rationale"] = data[alias]
+                    break
+            if "rationale" not in data or not data["rationale"]:
+                data["rationale"] = f"Executing {data.get('tool_slug', 'tool')} to advance investigation."
+
+        return data
 
 
 SELECT_ACTION_PROMPT = """You are RepoMind's investigation action selector.
 Given the user query, open evidence slots, current plan goal, and tool history, select the single best tool call to advance the investigation.
+Output your decision strictly as a JSON object matching the ToolDecision schema: {"tool_slug": "...", "arguments": {...}, "rationale": "..."}.
 
 Available Execution Tools:
-1. `explore_tree`: subpath (default '.'), depth (1-3), glob_pattern (e.g. '*.py')
+1. `explore_tree`: subpath (default '.'), depth (1-3), glob_pattern (e.g. '*.py', '*.cpp', '*.h')
 2. `read_file`: file_path (required, relative), start_line, end_line (reads ground-truth code lines)
 3. `search_code`: query (literal string or regex), is_regex (bool), path_scope
 4. `search_symbols`: query (symbol name substring), kind ('class' | 'function' | 'method')
@@ -47,13 +95,13 @@ Available Execution Tools:
 8. `trace_calls`: entry_symbol (required), depth (default 3)
 9. `semantic_search`: query (natural language concept), k (default 5)
 10. `get_history`: file_path, max_commits (default 5)
-11. `finish`: choose this if you have collected sufficient evidence to answer all slots.
+11. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
 
-Rules:
-- Never repeat the exact same tool call with identical arguments.
-- Prefer `search_symbols` or `search_code` when names or keywords are known.
-- Prefer `semantic_search` when concept is known but exact identifiers are not.
-- Prefer `read_file` to verify exact code and lines before asserting conclusions.
+Investigation Guidelines & Strict Rules:
+- NEVER repeat the exact same tool call with identical arguments as a previous step.
+- DO NOT search for the repository name itself (e.g. searching 'apex-book' inside apex-book repo). Search for technical concepts, identifiers, function names, classes, or keywords from the user question.
+- If a lexical search or symbol search returned 0 matches, DO NOT try the exact same query again. Use `explore_tree` to find relevant source directories, check `README.md`, or try `semantic_search`.
+- Once key source files are identified from `explore_tree` or code searches, IMMEDIATELY call `read_file` to inspect the code and collect verifiable line citations. Line citations ONLY come from reading files.
 - State your rationale in one clear sentence.
 """
 
@@ -65,27 +113,45 @@ def select_action_node(state: InvestigationState) -> dict:
     open_slots = [k for k, v in slots.items() if v == "OPEN"]
     plan = state.get("plan", [])
     history = state.get("tool_history", [])
-    recent_history = history[-4:] if history else []
+    recent_history = history[-5:] if history else []
     reflections = state.get("reflections", [])
     step_count = state.get("step_count", 0)
 
-    # Format history summary for the model
-    history_summary = [
-        f"Step {h['step']}: {h['tool_slug']} with args {h['arguments']} -> {h['status']}"
-        for h in recent_history
-    ]
+    # Format history summary with tool output summary
+    history_summary = []
+    for h in recent_history:
+        summary_snip = h.get("output_summary", "")
+        summary_snip = summary_snip.replace("<<<UNTRUSTED_REPOSITORY_DATA>>>", "").replace("<<<END_UNTRUSTED_REPOSITORY_DATA>>>", "").strip()
+        if len(summary_snip) > 280:
+            summary_snip = summary_snip[:280] + "..."
+        history_summary.append(
+            f"Step {h['step']}: {h['tool_slug']}({h['arguments']}) -> {h['status']}\n  Result: {summary_snip}"
+        )
+
+    findings = state.get("findings", [])
+    findings_summary = [f"- {f['claim']}" for f in findings[-4:]] if findings else ["No findings recorded yet."]
+
+    evidence = state.get("evidence_store", [])
+    inspected_files = list({e["file_path"] for e in evidence if e.get("file_path")})
 
     llm = get_llm(temperature=0.0)
-    structured_llm = llm.with_structured_output(ToolDecision)
+    structured_llm = (
+        llm.with_structured_output(ToolDecision, method="json_mode")
+        if LLM_PROVIDER == "groq"
+        else llm.with_structured_output(ToolDecision)
+    )
 
-    context = f"""
-Target Repo: {state.get('repo_path')}
+    context = f"""Target Repo: {state.get('repo_path')}
 User Query: {query}
 Open Evidence Slots: {open_slots}
-Active Plan: {[g['description'] for g in plan if g['status'] == 'PENDING'][:2]}
-Recent Tool Calls: {history_summary}
+Active Plan Goals: {[g['description'] for g in plan if g['status'] == 'PENDING'][:2]}
+Verified Files Already Read: {inspected_files}
+Current Findings:
+{chr(10).join(findings_summary)}
+Recent Tool Calls & Results:
+{chr(10).join(history_summary) if history_summary else 'No tool calls yet.'}
 Recent Reflections/Adjustments: {[r['next_approach'] for r in reflections[-2:]]}
-Step: {step_count + 1} of {state.get('max_steps', 25)}
+Step: {step_count + 1} of {state.get('max_steps', 20)}
 """
 
     try:
@@ -93,6 +159,29 @@ Step: {step_count + 1} of {state.get('max_steps', 25)}
             ("system", SELECT_ACTION_PROMPT),
             ("human", context),
         ])
+
+        # Anti-loop check: prevent calling identical tool + arguments as previous step
+        if recent_history and decision.tool_slug != "finish":
+            last = recent_history[-1]
+            if decision.tool_slug == last.get("tool_slug") and decision.arguments == last.get("arguments"):
+                logger.warning(
+                    "Duplicate tool call detected (%s, args=%s). Forcing alternative.",
+                    decision.tool_slug,
+                    decision.arguments,
+                )
+                if decision.tool_slug == "explore_tree":
+                    # If explore_tree was repeated, inspect README or source directory
+                    decision = ToolDecision(
+                        tool_slug="read_file",
+                        arguments={"file_path": "README.md", "start_line": 1, "end_line": 80},
+                        rationale="Reading README.md to understand project layout and entry points.",
+                    )
+                elif decision.tool_slug == "search_code":
+                    decision = ToolDecision(
+                        tool_slug="semantic_search",
+                        arguments={"query": query, "k": 3},
+                        rationale="Switching to semantic concept search since literal search was repeated.",
+                    )
 
         if decision.tool_slug == "finish":
             return {
@@ -109,10 +198,20 @@ Step: {step_count + 1} of {state.get('max_steps', 25)}
                 "rationale": decision.rationale,
             },
         }
-    except Exception:
-        # Fallback to explore_tree or search_code
-        fallback_tool = "search_code" if state.get("entities") else "explore_tree"
-        fallback_args = {"query": state["entities"][0]} if state.get("entities") else {"subpath": ".", "depth": 2}
+    except Exception as e:
+        logger.error("Action selection LLM invocation failed: %s", e, exc_info=True)
+        # Smart adaptive fallback avoiding repetition
+        used_tools = {h["tool_slug"] for h in recent_history}
+        if "explore_tree" not in used_tools:
+            fallback_tool = "explore_tree"
+            fallback_args = {"subpath": ".", "depth": 2}
+        elif "read_file" not in used_tools:
+            fallback_tool = "read_file"
+            fallback_args = {"file_path": "README.md", "start_line": 1, "end_line": 60}
+        else:
+            fallback_tool = "semantic_search"
+            fallback_args = {"query": query, "k": 3}
+
         return {
             "step_count": step_count + 1,
             "current_tool_call": {
