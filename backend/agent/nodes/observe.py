@@ -204,9 +204,128 @@ def observe_node(state: InvestigationState) -> dict:
             )
         )
 
+    # 6. extract_api_contracts
+    elif tool_slug == "extract_api_contracts" and raw_result.get("status") == "SUCCESS":
+        endpoints = raw_result.get("endpoints", [])
+        for ep in endpoints[:6]:
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=ep["file_path"],
+                    start_line=ep["line_number"],
+                    end_line=ep["line_number"],
+                    content_hash=hashlib.sha256(f"{ep['method']} {ep['path']}".encode()).hexdigest()[:16],
+                    snippet=f"{ep['method']} {ep['path']} -> {ep['handler']}",
+                    tool_source="extract_api_contracts",
+                    is_direct=True,
+                )
+            )
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"API Endpoint: {ep['method']} {ep['path']} handled by {ep['handler']} [{ep['file_path']}:{ep['line_number']}].",
+                    evidence_ids=[ev_id],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "SUPPORTED"
+
+    # 7. extract_data_models
+    elif tool_slug == "extract_data_models" and raw_result.get("status") == "SUCCESS":
+        models = raw_result.get("models", [])
+        for m in models[:6]:
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            fields_str = ", ".join(f["name"] for f in m.get("fields", [])[:5])
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=m["file_path"],
+                    start_line=m["line_number"],
+                    end_line=m["line_number"],
+                    content_hash=hashlib.sha256(m["model_name"].encode()).hexdigest()[:16],
+                    snippet=f"Model {m['model_name']} ({fields_str})",
+                    tool_source="extract_data_models",
+                    is_direct=True,
+                )
+            )
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"Data Model: {m['model_name']} defined in {m['file_path']}:{m['line_number']} with fields [{fields_str}].",
+                    evidence_ids=[ev_id],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "SUPPORTED"
+
+    # 8. trace_data_flow
+    elif tool_slug == "trace_data_flow" and raw_result.get("status") == "SUCCESS":
+        steps = raw_result.get("flow_steps", [])
+        for hop in steps[:5]:
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=hop.get("file_path", "unknown"),
+                    start_line=hop.get("line_number", 1),
+                    end_line=hop.get("line_number", 1),
+                    content_hash=hashlib.sha256(hop["action"].encode()).hexdigest()[:16],
+                    snippet=hop["action"],
+                    tool_source="trace_data_flow",
+                    is_direct=True,
+                )
+            )
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"Step {hop['step']}: {hop['action']} [{hop.get('file_path', 'code')}:{hop.get('line_number', 1)}].",
+                    evidence_ids=[ev_id],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "SUPPORTED"
+
+    # 9. map_architecture_layers
+    elif tool_slug == "map_architecture_layers" and raw_result.get("status") == "SUCCESS":
+        layers = raw_result.get("layers", [])
+        ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+        layer_summary = ", ".join(f"{l['name']} ({l['component_count']} components)" for l in layers)
+        new_evidence.append(
+            EvidenceItem(
+                id=ev_id,
+                file_path="architecture",
+                start_line=1,
+                end_line=len(layers),
+                content_hash=hashlib.sha256(layer_summary.encode()).hexdigest()[:16],
+                snippet=layer_summary,
+                tool_source="map_architecture_layers",
+                is_direct=False,
+            )
+        )
+        new_findings.append(
+            Finding(
+                id=f"find_{uuid.uuid4().hex[:8]}",
+                claim=f"Mapped architecture into {len(layers)} layers: {layer_summary}.",
+                evidence_ids=[ev_id],
+                confidence="CONFIRMED",
+                slot_id=target_slot,
+            )
+        )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "SUPPORTED"
+
     return {
         "evidence_store": new_evidence,
         "findings": new_findings,
         "evidence_slots": updated_slots,
+        "contracts_store": raw_result.get("endpoints", []) if tool_slug == "extract_api_contracts" else [],
+        "models_store": raw_result.get("models", []) if tool_slug == "extract_data_models" else [],
         "current_tool_call": None,
     }

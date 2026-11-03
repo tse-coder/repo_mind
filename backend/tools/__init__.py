@@ -6,15 +6,19 @@ from collections.abc import Callable
 from typing import Any
 
 from backend.tools.explore_tree import explore_tree
+from backend.tools.extract_api_contracts import extract_api_contracts
+from backend.tools.extract_data_models import extract_data_models
 from backend.tools.find_references import find_references
 from backend.tools.get_history import get_history
 from backend.tools.get_relationships import get_relationships
 from backend.tools.get_symbol import get_symbol
+from backend.tools.map_architecture_layers import map_architecture_layers
 from backend.tools.read_file import read_file
 from backend.tools.search_code import search_code
 from backend.tools.search_symbols import search_symbols
 from backend.tools.semantic_search import semantic_search
 from backend.tools.trace_calls import trace_calls
+from backend.tools.trace_data_flow import trace_data_flow
 
 TOOL_REGISTRY: dict[str, Callable[..., dict[str, Any]]] = {
     "explore_tree": explore_tree,
@@ -27,6 +31,10 @@ TOOL_REGISTRY: dict[str, Callable[..., dict[str, Any]]] = {
     "trace_calls": trace_calls,
     "semantic_search": semantic_search,
     "get_history": get_history,
+    "extract_api_contracts": extract_api_contracts,
+    "extract_data_models": extract_data_models,
+    "trace_data_flow": trace_data_flow,
+    "map_architecture_layers": map_architecture_layers,
 }
 
 

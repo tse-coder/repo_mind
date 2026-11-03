@@ -21,11 +21,16 @@ const QUICK_PATHS = [
   { label: 'RepoMind Engine', path: '.' },
 ];
 
+const ARTIFACT_TEMPLATES = [
+  { label: '🏗️ Architecture Map', query: 'Map the high-level system architecture, layers, and module dependencies into a diagram.' },
+  { label: '🔄 Request Flow', query: 'Trace the end-to-end request lifecycle and data flow from route handler to database into a sequence diagram.' },
+  { label: '🗄️ Database ERD', query: 'Extract the data models and database schemas into an entity-relationship ERD diagram.' },
+  { label: '🔌 API Contracts', query: 'Extract and list all API endpoints, HTTP routes, methods, and schemas in an API contract table.' },
+];
+
 const EXAMPLE_QUERIES = [
   'Where is the login handler and authentication logic defined?',
-  'Trace how requests flow from auth router to user model.',
   'What security policies and sandbox protections are enforced?',
-  'Where are secrets redacted before entering LLM context?',
 ];
 
 export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }) => {
@@ -195,10 +200,29 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
             disabled={isLoading}
             required
           />
-          {/* Example query chips */}
+          {/* Defined Artifact Action Chips */}
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            <span className="text-[11px] text-slate-500 font-mono font-semibold">
+              Artifacts:
+            </span>
+            {ARTIFACT_TEMPLATES.map((tmpl, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setQuery(tmpl.query)}
+                className="text-[11px] px-2 py-0.5 rounded-none bg-slate-900 hover:bg-slate-800 text-white font-mono font-medium border border-slate-900 transition flex items-center gap-1"
+                disabled={isLoading}
+                title={tmpl.query}
+              >
+                {tmpl.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Example query chips */}
+          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
             <span className="text-[11px] text-slate-400 font-mono">
-              Templates:
+              Questions:
             </span>
             {EXAMPLE_QUERIES.map((q, idx) => (
               <button

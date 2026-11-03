@@ -90,6 +90,7 @@ class InvestigationState(TypedDict):
     repo_path: str
     commit_sha: str
     query: str
+    artifact_type: str | None  # "EXPLAIN" | "ARCHITECTURE_DIAGRAM" | "DATA_FLOW" | "SCHEMA_ERD" | "API_CONTRACTS"
 
     # ── Classification ─────────────────────────────────────────────────────────
     query_type: str  # "LOCATE" | "TRACE_FLOW" | "ARCHITECTURE" | "DEPENDENCY" | "ERROR_ORIGIN" | "MIXED"
@@ -101,6 +102,10 @@ class InvestigationState(TypedDict):
     plan: list[PlanGoal]
     plan_version: int
     current_goal_id: str | None
+
+    # ── Reverse-engineering stores ─────────────────────────────────────────────
+    contracts_store: Annotated[list[dict[str, Any]], operator.add]
+    models_store: Annotated[list[dict[str, Any]], operator.add]
 
     # ── Append-only stores ─────────────────────────────────────────────────────
     tool_history: Annotated[list[ToolCallRecord], operator.add]
