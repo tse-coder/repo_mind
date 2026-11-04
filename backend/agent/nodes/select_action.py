@@ -202,6 +202,7 @@ Step: {step_count + 1} of {state.get('max_steps', 20)}
                 "step_count": step_count + 1,
                 "current_tool_call": None,
                 "next_route": "synthesize",
+                "status": "PARTIAL" if state.get("limitations") else "SUFFICIENT",
             }
 
         return {

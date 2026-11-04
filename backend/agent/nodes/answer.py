@@ -11,7 +11,11 @@ def answer_node(state: InvestigationState) -> dict:
     """Format final output with citations, limitations, and confidence rating."""
     draft = state.get("draft_answer", "")
     limitations = state.get("limitations", [])
-    status = state.get("status", "SUFFICIENT")
+    raw_status = state.get("status", "SUFFICIENT")
+    if raw_status in ("RUNNING", "INITIALIZED"):
+        status = "PARTIAL" if limitations else "SUFFICIENT"
+    else:
+        status = raw_status
     step_count = state.get("step_count", 0)
     evidence_count = len(state.get("evidence_store", []))
     findings = state.get("findings", [])
