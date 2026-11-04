@@ -274,10 +274,21 @@ class InvestigationManager:
                                 "tool": latest.get("tool_slug"),
                                 "status": latest.get("status"),
                                 "summary": summary[:600],
+                                "step": latest.get("step"),
                             },
                         )
 
-                    # 5. Reflection Event
+                    # 5. Evidence & Findings Event (when observe finishes)
+                    if state_update.get("evidence_store") or state_update.get("findings"):
+                        await session.emit_event(
+                            "evidence_update",
+                            {
+                                "evidence": state_update.get("evidence_store", []),
+                                "findings": state_update.get("findings", []),
+                            },
+                        )
+
+                    # 6. Reflection Event
                     if state_update.get("reflections"):
                         latest_ref = state_update["reflections"][-1]
                         await session.emit_event(
@@ -289,20 +300,22 @@ class InvestigationManager:
                             },
                         )
 
-                    # 6. Streaming Token Generation
+                    # 7. Streaming Token Generation
                     if state_update.get("draft_answer"):
                         draft = state_update["draft_answer"]
                         if isinstance(draft, list) and len(draft) > 0 and isinstance(draft[0], dict):
                             draft = draft[0].get("text", str(draft))
                         draft_str = str(draft)
-                        # Stream draft tokens in bite-sized chunks
-                        for idx in range(0, len(draft_str), 50):
+                        # Stream draft tokens in smooth bite-sized chunks
+                        chunk_size = 12
+                        for idx in range(0, len(draft_str), chunk_size):
                             await session.emit_event(
                                 "token",
-                                {"token": draft_str[idx : idx + 50]},
+                                {"token": draft_str[idx : idx + chunk_size]},
                             )
+                            await asyncio.sleep(0.012)
 
-                    # 7. Final Answer
+                    # 8. Final Answer
                     if state_update.get("final_answer"):
                         fin = state_update["final_answer"]
                         if isinstance(fin, list) and len(fin) > 0 and isinstance(fin[0], dict):

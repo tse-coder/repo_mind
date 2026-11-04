@@ -9,6 +9,8 @@ import { ClarificationModal } from '../components/ClarificationModal';
 import {
   ChatSession,
   ClarificationPrompt,
+  EvidenceItem,
+  FindingItem,
   InvestigationState,
   ReflectionItem,
   ToolCallItem,
@@ -243,6 +245,34 @@ export default function Home() {
               };
             }
             return { ...chat, state: { ...chat.state, toolCalls: updated } };
+          });
+        } catch {}
+      });
+
+      eventSource.addEventListener('evidence_update', (e: MessageEvent) => {
+        try {
+          const payload = JSON.parse(e.data);
+          const newEv: EvidenceItem[] = payload.evidence || [];
+          const newFind: FindingItem[] = payload.findings || [];
+          updateChat(targetChatId, (chat) => {
+            const existingEvIds = new Set(chat.state.evidenceStore.map((x) => x.id));
+            const existingFindIds = new Set(chat.state.findings.map((x) => x.id));
+            const mergedEv = [
+              ...chat.state.evidenceStore,
+              ...newEv.filter((x) => !existingEvIds.has(x.id)),
+            ];
+            const mergedFind = [
+              ...chat.state.findings,
+              ...newFind.filter((x) => !existingFindIds.has(x.id)),
+            ];
+            return {
+              ...chat,
+              state: {
+                ...chat.state,
+                evidenceStore: mergedEv,
+                findings: mergedFind,
+              },
+            };
           });
         } catch {}
       });
