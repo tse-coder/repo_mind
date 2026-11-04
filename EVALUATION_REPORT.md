@@ -10,7 +10,7 @@ This report documents the empirical evaluation of RepoMind across happy-path rep
 
 ## 2. Benchmark Evaluation Results & Success Rate
 
-All benchmark scenarios were executed using the automated evaluation harness ([backend/evaluation/harness.py](file:///home/tsegaye/Projects/agentic-ai-project/backend/evaluation/harness.py)).
+All benchmark scenarios were executed using the automated evaluation harness ([backend/evaluation/harness.py](backend/evaluation/harness.py)).
 
 | # | Evaluation Scenario | Category | Result | Steps | Key Agentic Behavior Verified |
 |---|---|---|:---:|:---:|---|

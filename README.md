@@ -2,10 +2,10 @@
 
 > An autonomous, read-only software repository investigation agent built with **LangGraph**, **Google Gemini / Groq**, **ChromaDB**, **FastAPI**, and **Next.js**.
 
-[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-34%2F34%20Passed-emerald)](file:///home/tsegaye/Projects/agentic-ai-project/tests/unit/)
-[![Integration Tests](https://img.shields.io/badge/Integration%20Tests-13%2F13%20Passed-emerald)](file:///home/tsegaye/Projects/agentic-ai-project/tests/integration/)
-[![Evaluation Benchmark](https://img.shields.io/badge/Benchmark-6%2F6%20Passed%20(100%25)-blue)](file:///home/tsegaye/Projects/agentic-ai-project/EVALUATION_REPORT.md)
-[![Python Version](https://img.shields.io/badge/Python-3.13%20(uv)-slate)](file:///home/tsegaye/Projects/agentic-ai-project/pyproject.toml)
+[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-34%2F34%20Passed-emerald)](tests/unit/)
+[![Integration Tests](https://img.shields.io/badge/Integration%20Tests-13%2F13%20Passed-emerald)](tests/integration/)
+[![Evaluation Benchmark](https://img.shields.io/badge/Benchmark-6%2F6%20Passed%20(100%25)-blue)](EVALUATION_REPORT.md)
+[![Python Version](https://img.shields.io/badge/Python-3.13%20(uv)-slate)](pyproject.toml)
 
 ---
 
@@ -180,7 +180,7 @@ class InvestigationState(TypedDict):
 
 ## 7. Evaluation & Capstone Benchmark Summary
 
-The system is tested against 6 automated evaluation scenarios in [`backend/evaluation/harness.py`](file:///home/tsegaye/Projects/agentic-ai-project/backend/evaluation/harness.py):
+The system is tested against 6 automated evaluation scenarios in [`backend/evaluation/harness.py`](backend/evaluation/harness.py):
 
 | # | Evaluation Scenario | Category | Result | Key Agentic Behavior Verified |
 |---|---|---|:---:|---|
@@ -191,7 +191,7 @@ The system is tested against 6 automated evaluation scenarios in [`backend/evalu
 | **5** | **Ambiguous Symbol Handling** | Disambiguation | ✅ **PASSED** | Detected dual `Handler` classes across separate packages and cited both. |
 | **6** | **Empty Repository Handling** | Boundary / Edge Case | ✅ **PASSED** | Handled 0-file directory cleanly, recording explicit limitations. |
 
-> **Overall Pass Rate:** **100% (6 / 6 Passed)**. Detailed empirical analysis and agentic logs are available in [`EVALUATION_REPORT.md`](file:///home/tsegaye/Projects/agentic-ai-project/EVALUATION_REPORT.md).
+> **Overall Pass Rate:** **100% (6 / 6 Passed)**. Detailed empirical analysis and agentic logs are available in [`EVALUATION_REPORT.md`](EVALUATION_REPORT.md).
 
 ---
 
