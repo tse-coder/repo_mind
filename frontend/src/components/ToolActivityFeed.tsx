@@ -82,11 +82,8 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
                     ) : (
                       <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                     )}
-                    <span className="text-xs font-mono font-bold text-slate-900">
+                    <span className="text-xs font-mono font-bold text-slate-900 truncate">
                       {tc.tool}
-                    </span>
-                    <span className="text-xs text-slate-600 truncate max-w-[220px] sm:max-w-[300px]">
-                      {tc.rationale}
                     </span>
                   </div>
                   <div className="shrink-0 ml-2">{getToolStatusBadge(tc.status)}</div>

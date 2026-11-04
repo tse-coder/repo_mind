@@ -195,9 +195,6 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
                     <span className="font-mono text-xs font-bold text-slate-900 truncate">
                       {tc.tool}
                     </span>
-                    <span className="text-xs text-slate-500 truncate max-w-[200px] sm:max-w-[260px]">
-                      {tc.rationale || targetFile}
-                    </span>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 ml-2">
