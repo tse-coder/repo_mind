@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MessageSquarePlus, Trash2, Folder } from 'lucide-react';
+import { Plus, Trash2, Folder } from 'lucide-react';
 import { ChatSession } from '../types';
 
 interface ChatListProps {
@@ -59,10 +59,11 @@ export const ChatList: React.FC<ChatListProps> = ({
         <button
           type="button"
           onClick={onNew}
-          className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-mono font-semibold bg-slate-900 text-white hover:bg-slate-800 border border-slate-900"
+          title="New investigation"
+          aria-label="New investigation"
+          className="flex items-center justify-center p-1.5 bg-slate-900 text-white hover:bg-slate-800 border border-slate-900 transition cursor-pointer"
         >
-          <MessageSquarePlus className="w-3.5 h-3.5" />
-          New
+          <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
 
