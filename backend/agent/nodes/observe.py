@@ -66,7 +66,10 @@ def observe_node(state: InvestigationState) -> dict:
             )
         )
         if target_slot in updated_slots:
-            updated_slots[target_slot] = "SUPPORTED"
+            # If reading a doc file for a code/logic slot, treat as INFERRED rather than terminating
+            is_doc = file_path.endswith((".md", ".rst", ".txt"))
+            slot_is_doc = "doc" in target_slot.lower() or "read" in target_slot.lower()
+            updated_slots[target_slot] = "SUPPORTED" if (not is_doc or slot_is_doc) else "INFERRED"
 
     # 2. search_code matches
     elif tool_slug == "search_code" and raw_result.get("status") == "SUCCESS":
@@ -97,7 +100,7 @@ def observe_node(state: InvestigationState) -> dict:
                 )
             )
             if target_slot in updated_slots:
-                updated_slots[target_slot] = "SUPPORTED"
+                updated_slots[target_slot] = "INFERRED"
 
     # 3. search_symbols / get_symbol
     elif tool_slug in ("search_symbols", "get_symbol") and raw_result.get("status") == "SUCCESS":
@@ -154,7 +157,7 @@ def observe_node(state: InvestigationState) -> dict:
                     )
                 )
                 if target_slot in updated_slots:
-                    updated_slots[target_slot] = "SUPPORTED"
+                    updated_slots[target_slot] = "INFERRED"
 
     # 4. semantic_search / search_docs
     elif tool_slug in ("semantic_search", "search_docs") and raw_result.get("status") == "SUCCESS":
@@ -186,25 +189,187 @@ def observe_node(state: InvestigationState) -> dict:
                 )
             )
             if target_slot in updated_slots:
-                updated_slots[target_slot] = "SUPPORTED"
+                updated_slots[target_slot] = "INFERRED"
 
     # 5. explore_tree
     elif tool_slug == "explore_tree" and raw_result.get("status") == "SUCCESS":
         entries = raw_result.get("entries", [])
+        files = [e["path"] for e in entries if e.get("type") == "file"]
+        dirs = [e["path"] for e in entries if e.get("type") == "directory"]
+        subpath = arguments.get("subpath", ".")
+
+        # Create valid evidence for top discovered code files, or directory if empty
+        if files:
+            for fpath in files[:3]:
+                ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+                new_evidence.append(
+                    EvidenceItem(
+                        id=ev_id,
+                        file_path=fpath,
+                        start_line=1,
+                        end_line=1,
+                        content_hash=hashlib.sha256(fpath.encode()).hexdigest()[:16],
+                        snippet=f"Discovered file under {subpath}: {fpath}",
+                        tool_source="explore_tree",
+                        is_direct=False,
+                    )
+                )
+        else:
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=subpath,
+                    start_line=1,
+                    end_line=1,
+                    content_hash=hashlib.sha256(f"empty:{subpath}".encode()).hexdigest()[:16],
+                    snippet=f"Explored directory '{subpath}': no files found ({len(dirs)} subdirectories).",
+                    tool_source="explore_tree",
+                    is_direct=False,
+                )
+            )
+
+        new_findings.append(
+            Finding(
+                id=f"find_{uuid.uuid4().hex[:8]}",
+                claim=f"Directory '{subpath}' contains {len(entries)} entries ({len(files)} files, {len(dirs)} dirs). Discovered files: {', '.join(files[:12])}.",
+                evidence_ids=[e["id"] for e in new_evidence],
+                confidence="CONFIRMED",
+                slot_id=target_slot,
+            )
+        )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "INFERRED"
+
+    # 6. get_history
+    elif tool_slug == "get_history" and raw_result.get("status") == "SUCCESS":
+        commits = raw_result.get("commits", [])
+        fpath = arguments.get("file_path") or "repo"
+        if commits:
+            top_commits = commits[:5]
+            summary_lines = [f"{c['sha'][:8]} ({c['date']}): {c['message']} [{c['author']}]" for c in top_commits]
+            snippet = "\n".join(summary_lines)
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=fpath if fpath != "repo" else "git:HEAD",
+                    start_line=1,
+                    end_line=len(top_commits),
+                    content_hash=hashlib.sha256(snippet.encode()).hexdigest()[:16],
+                    snippet=snippet,
+                    tool_source="get_history",
+                    is_direct=True,
+                )
+            )
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"Retrieved {len(commits)} commits for '{fpath}'. Latest: '{commits[0]['message']}' by {commits[0]['author']} on {commits[0]['date']}.",
+                    evidence_ids=[ev_id],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+            if target_slot in updated_slots:
+                updated_slots[target_slot] = "SUPPORTED"
+
+    # 7. find_references
+    elif tool_slug == "find_references" and raw_result.get("status") == "SUCCESS":
+        refs = raw_result.get("references", [])
+        sym = raw_result.get("symbol_name", "")
+        for r in refs[:3]:
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=r["file_path"],
+                    start_line=r["line_number"],
+                    end_line=r["line_number"],
+                    content_hash=hashlib.sha256(f"{r['caller_name']}->{sym}".encode()).hexdigest()[:16],
+                    snippet=f"Caller '{r['caller_name']}' references symbol '{sym}'",
+                    tool_source="find_references",
+                    is_direct=False,
+                )
+            )
+        if refs:
+            top_ref = refs[0]
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"Symbol '{sym}' is referenced in {len(refs)} locations (e.g. {top_ref['file_path']}:{top_ref['line_number']} by '{top_ref['caller_name']}').",
+                    evidence_ids=[e["id"] for e in new_evidence],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+            if target_slot in updated_slots:
+                updated_slots[target_slot] = "SUPPORTED"
+
+    # 8. get_relationships
+    elif tool_slug == "get_relationships" and raw_result.get("status") == "SUCCESS":
+        rels = raw_result.get("relationships", [])
+        fpath = raw_result.get("file_path", "")
+        direction = raw_result.get("direction", "imports")
+        if rels:
+            dep_names = [r.get("module", "") for r in rels[:8]]
+            snippet = f"{direction}: {', '.join(dep_names)}"
+            ev_id = f"ev_{uuid.uuid4().hex[:8]}"
+            new_evidence.append(
+                EvidenceItem(
+                    id=ev_id,
+                    file_path=fpath,
+                    start_line=1,
+                    end_line=len(rels),
+                    content_hash=hashlib.sha256(snippet.encode()).hexdigest()[:16],
+                    snippet=snippet,
+                    tool_source="get_relationships",
+                    is_direct=True,
+                )
+            )
+            new_findings.append(
+                Finding(
+                    id=f"find_{uuid.uuid4().hex[:8]}",
+                    claim=f"File '{fpath}' has {len(rels)} {direction} dependencies: {', '.join(dep_names[:6])}.",
+                    evidence_ids=[ev_id],
+                    confidence="CONFIRMED",
+                    slot_id=target_slot,
+                )
+            )
+            if target_slot in updated_slots:
+                updated_slots[target_slot] = "SUPPORTED"
+
+    # 9. trace_calls
+    elif tool_slug == "trace_calls" and raw_result.get("status") == "SUCCESS":
+        call_tree = raw_result.get("call_tree", {})
+        entry_sym = raw_result.get("entry_symbol", "")
+        calls = call_tree.get("calls", []) if isinstance(call_tree, dict) else []
+        callee_names = [c.get("symbol", "") for c in calls if isinstance(c, dict)]
+        snippet = f"Entry: {entry_sym} calls -> {', '.join(callee_names)}"
         ev_id = f"ev_{uuid.uuid4().hex[:8]}"
-        summary_snippet = f"Explored {len(entries)} directory entries under {arguments.get('subpath', '.')}"
         new_evidence.append(
             EvidenceItem(
                 id=ev_id,
-                file_path=arguments.get("subpath", "."),
+                file_path=call_tree.get("file_path", "ast_call_tree"),
                 start_line=1,
-                end_line=len(entries),
-                content_hash=hashlib.sha256(summary_snippet.encode()).hexdigest()[:16],
-                snippet=summary_snippet,
-                tool_source="explore_tree",
+                end_line=len(calls) or 1,
+                content_hash=hashlib.sha256(snippet.encode()).hexdigest()[:16],
+                snippet=snippet,
+                tool_source="trace_calls",
                 is_direct=False,
             )
         )
+        new_findings.append(
+            Finding(
+                id=f"find_{uuid.uuid4().hex[:8]}",
+                claim=f"Call trace from entry '{entry_sym}' reaches {len(callee_names)} direct callees: {', '.join(callee_names[:6])}.",
+                evidence_ids=[ev_id],
+                confidence="CONFIRMED",
+                slot_id=target_slot,
+            )
+        )
+        if target_slot in updated_slots:
+            updated_slots[target_slot] = "SUPPORTED"
 
     return {
         "evidence_store": new_evidence,

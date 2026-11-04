@@ -24,6 +24,9 @@ def verify_node(state: InvestigationState) -> dict:
     invalid_citations = []
 
     for file_rel, start_l, end_l in citations:
+        # Ignore pseudo-citations to root, directories, or git commit references
+        if file_rel in (".", "./", "git:HEAD") or (repo_root / file_rel).is_dir():
+            continue
         target = repo_root / file_rel
         if not target.exists() or not target.is_file():
             invalid_citations.append(f"{file_rel}:{start_l}")

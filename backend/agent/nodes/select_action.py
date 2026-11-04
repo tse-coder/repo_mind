@@ -100,11 +100,12 @@ Available Execution Tools:
 12. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
 
 Investigation Guidelines & Strict Rules:
+- USER DIRECTIVE PRIORITY: If the user's latest query explicitly mentions a tool, action, or resource (e.g. 'explore git histories' -> `get_history`, 'check docs' -> `search_docs` or `read_file('README.md')`, 'trace calls' -> `trace_calls`), you MUST prioritize that specific tool on your next step!
 - NEVER repeat the exact same tool call with identical arguments as a previous step.
-- DO NOT search for the repository name itself (e.g. searching 'apex-book' inside apex-book repo). Search for technical concepts, identifiers, function names, classes, or keywords from the user question.
-- Use `search_docs` when the question is about *why* a design exists, ADRs, retry/session policies, documented architecture, or README intent. `semantic_search` is for code concepts; `search_docs` is for documentation.
-- If a lexical search or symbol search returned 0 matches, DO NOT try the exact same query again. Use `explore_tree` to find relevant source directories, check `README.md`, try `search_docs`, or try `semantic_search`.
-- Once key source files are identified from `explore_tree` or code searches, IMMEDIATELY call `read_file` to inspect the code and collect verifiable line citations. Line citations ONLY come from reading files.
+- DO NOT search for the repository name itself. Search for technical concepts, identifiers, function names, classes, or keywords from the user question.
+- TRACE_FLOW FOLLOW-THROUGH: When tracing execution paths or data flow, if a previous step identified a router, handler, or module import (e.g. `main.py` including `curriculum_router` from `app/api/curriculum.py`), your NEXT action MUST be to inspect that router or service file with `read_file`! Do not stop at the entrypoint.
+- TYPO RESILIENCE & SEARCH FALLBACK: If a literal `search_code` returned 0 matches, DO NOT try the exact same query again. Immediately switch to `semantic_search` or use `explore_tree` on subdirectories (`subpath='app'`, `subpath='src'`) to find where the feature lives.
+- GROUND TRUTH CITATIONS: Once key source files are identified from `explore_tree` or code searches, IMMEDIATELY call `read_file` to inspect the code and collect verifiable line citations. Line citations ONLY come from reading files.
 - State your rationale in one clear sentence.
 """
 

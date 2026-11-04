@@ -78,21 +78,6 @@ def plan_node(state: InvestigationState) -> dict:
     if not open_slots:
         return {"next_route": "synthesize"}
 
-    # Single open slot shortcut
-    if len(open_slots) == 1 and not existing_plan:
-        goal = PlanGoal(
-            id=f"goal_{uuid.uuid4().hex[:6]}",
-            description=f"Investigate: {open_slots[0]}",
-            status="PENDING",
-            evidence_slot=open_slots[0],
-        )
-        return {
-            "plan": [goal],
-            "plan_version": state.get("plan_version", 0) + 1,
-            "current_goal_id": goal["id"],
-            "next_route": "select_action",
-        }
-
     llm = get_llm(temperature=0.0)
     structured_llm = (
         llm.with_structured_output(PlanProposal, method="json_mode")
@@ -133,14 +118,43 @@ Existing Plan Goals: {[g['description'] for g in existing_plan]}
             )
 
         if not plan_goals:
-            plan_goals = [
-                PlanGoal(
-                    id=f"goal_{uuid.uuid4().hex[:6]}",
-                    description=f"Resolve {open_slots[0]}",
-                    status="PENDING",
-                    evidence_slot=open_slots[0],
-                )
-            ]
+            # Fallback phased multi-goal plan
+            if query_type == "TRACE_FLOW":
+                plan_goals = [
+                    PlanGoal(
+                        id=f"goal_{uuid.uuid4().hex[:6]}",
+                        description=f"Identify entrypoint and router definitions for: {query[:50]}",
+                        status="PENDING",
+                        evidence_slot=open_slots[0],
+                    ),
+                    PlanGoal(
+                        id=f"goal_{uuid.uuid4().hex[:6]}",
+                        description="Inspect core service handler and business logic execution path",
+                        status="PENDING",
+                        evidence_slot=open_slots[1] if len(open_slots) > 1 else open_slots[0],
+                    ),
+                    PlanGoal(
+                        id=f"goal_{uuid.uuid4().hex[:6]}",
+                        description="Trace data layer operations and response serialization",
+                        status="PENDING",
+                        evidence_slot=open_slots[-1],
+                    ),
+                ]
+            else:
+                plan_goals = [
+                    PlanGoal(
+                        id=f"goal_{uuid.uuid4().hex[:6]}",
+                        description=f"Locate key files and modules for: {query[:50]}",
+                        status="PENDING",
+                        evidence_slot=open_slots[0],
+                    ),
+                    PlanGoal(
+                        id=f"goal_{uuid.uuid4().hex[:6]}",
+                        description="Inspect code definitions, classes, and logic implementation",
+                        status="PENDING",
+                        evidence_slot=open_slots[-1],
+                    ),
+                ]
 
         current_id = plan_goals[0]["id"] if plan_goals else None
 

@@ -64,11 +64,33 @@ def evaluate_node(state: InvestigationState) -> dict:
             "limitations": limitations,
         }
 
-    # 5. Check if all required evidence slots are resolved
+    # 5. Check if required evidence slots are genuinely resolved
+    query_type = state.get("query_type", "LOCATE")
+    evidence_store = state.get("evidence_store", [])
+    inspected_code_files = [
+        e["file_path"]
+        for e in evidence_store
+        if e.get("file_path") and not e["file_path"].endswith((".md", ".rst", ".txt", "git:HEAD"))
+    ]
+
     all_resolved = len(slots) > 0 and all(
         v in ("SUPPORTED", "INFERRED", "UNANSWERABLE") for v in slots.values()
     )
-    if all_resolved:
+
+    # Minimum depth guard: Ensure we don't prematurely halt after just 1 step
+    # unless it's a simple LOCATE where the symbol has already been directly inspected in code.
+    is_premature = False
+    if step_count < 2:
+        if query_type in ("TRACE_FLOW", "ARCHITECTURE", "DEPENDENCY"):
+            is_premature = True
+        elif query_type == "LOCATE" and not inspected_code_files:
+            is_premature = True
+
+    # For TRACE_FLOW: require at least 2 steps (e.g. entrypoint + router/service)
+    if query_type == "TRACE_FLOW" and step_count < 3 and len(inspected_code_files) < 2:
+        is_premature = True
+
+    if all_resolved and not is_premature:
         return {
             "next_route": "synthesize",
             "status": "SUFFICIENT",
