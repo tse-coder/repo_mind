@@ -11,9 +11,9 @@ from backend.knowledge.ast_parser import RepoASTIndex
 
 def search_symbols(
     repo_path: str,
-    query: str,
+    query: str = "",
     kind: str | None = None,
-    max_results: int = 25,
+    max_results: int = 50,
 ) -> dict[str, Any]:
     """Search for classes, functions, or methods by name."""
     ast_index = RepoASTIndex(repo_path)

@@ -90,6 +90,11 @@ def evaluate_node(state: InvestigationState) -> dict:
     if query_type == "TRACE_FLOW" and step_count < 3 and len(inspected_code_files) < 2:
         is_premature = True
 
+    # Plan follow-through: If planned goals remain pending, don't halt prematurely
+    has_pending_goals = any(g.get("status") == "PENDING" for g in state.get("plan", []))
+    if has_pending_goals and step_count < 5:
+        is_premature = True
+
     if all_resolved and not is_premature:
         return {
             "next_route": "synthesize",

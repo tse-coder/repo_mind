@@ -205,7 +205,7 @@ class RepoASTIndex:
         for s in self.symbols:
             if kind and s.kind.lower() != kind.lower():
                 continue
-            if q in s.name.lower():
+            if not q or q == "*" or q in s.name.lower():
                 results.append(s)
         return results
 

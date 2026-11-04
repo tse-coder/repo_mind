@@ -74,7 +74,7 @@ def observe_node(state: InvestigationState) -> dict:
     # 2. search_code matches
     elif tool_slug == "search_code" and raw_result.get("status") == "SUCCESS":
         matches = raw_result.get("matches", [])
-        for m in matches[:3]:
+        for m in matches[:20]:
             ev_id = f"ev_{uuid.uuid4().hex[:8]}"
             new_evidence.append(
                 EvidenceItem(
@@ -93,7 +93,7 @@ def observe_node(state: InvestigationState) -> dict:
             new_findings.append(
                 Finding(
                     id=f"find_{uuid.uuid4().hex[:8]}",
-                    claim=f"Search '{raw_result.get('query')}' matched in {top['file_path']}:{top['line_number']}.",
+                    claim=f"Search '{raw_result.get('query')}' matched {len(matches)} lines across {len(set(m['file_path'] for m in matches))} files (e.g. {top['file_path']}:{top['line_number']}).",
                     evidence_ids=[new_evidence[0]["id"]],
                     confidence="INFERRED",
                     slot_id=target_slot,
@@ -132,26 +132,26 @@ def observe_node(state: InvestigationState) -> dict:
                 updated_slots[target_slot] = "SUPPORTED"
         elif tool_slug == "search_symbols":
             symbols = raw_result.get("symbols", [])
-            if symbols:
-                top_sym = symbols[0]
+            for sym in symbols[:25]:
                 ev_id = f"ev_{uuid.uuid4().hex[:8]}"
                 new_evidence.append(
                     EvidenceItem(
                         id=ev_id,
-                        file_path=top_sym["file_path"],
-                        start_line=top_sym["start_line"],
-                        end_line=top_sym["end_line"],
-                        content_hash=hashlib.sha256(top_sym["name"].encode()).hexdigest()[:16],
-                        snippet=top_sym.get("signature", top_sym["name"]),
+                        file_path=sym["file_path"],
+                        start_line=sym["start_line"],
+                        end_line=sym["end_line"],
+                        content_hash=hashlib.sha256(sym["name"].encode()).hexdigest()[:16],
+                        snippet=f"{sym.get('kind', 'symbol')} {sym['name']}{sym.get('signature', '')}",
                         tool_source="search_symbols",
                         is_direct=False,
                     )
                 )
+            if symbols:
                 new_findings.append(
                     Finding(
                         id=f"find_{uuid.uuid4().hex[:8]}",
-                        claim=f"Located symbol '{top_sym['name']}' in {top_sym['file_path']}.",
-                        evidence_ids=[ev_id],
+                        claim=f"Symbol search for '{raw_result.get('query')}' found {len(symbols)} symbols: {', '.join(s['name'] for s in symbols[:12])}.",
+                        evidence_ids=[e["id"] for e in new_evidence],
                         confidence="INFERRED",
                         slot_id=target_slot,
                     )
@@ -162,8 +162,7 @@ def observe_node(state: InvestigationState) -> dict:
     # 4. semantic_search / search_docs
     elif tool_slug in ("semantic_search", "search_docs") and raw_result.get("status") == "SUCCESS":
         results = raw_result.get("results", [])
-        if results:
-            top_r = results[0]
+        for top_r in results[:5]:
             ev_id = f"ev_{uuid.uuid4().hex[:8]}"
             new_evidence.append(
                 EvidenceItem(
@@ -177,6 +176,8 @@ def observe_node(state: InvestigationState) -> dict:
                     is_direct=False,
                 )
             )
+        if results:
+            top_r = results[0]
             heading = top_r.get("heading") or ""
             heading_bit = f" ({heading})" if heading else ""
             new_findings.append(

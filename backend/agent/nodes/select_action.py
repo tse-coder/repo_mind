@@ -106,6 +106,7 @@ Investigation Guidelines & Strict Rules:
 - TRACE_FLOW FOLLOW-THROUGH: When tracing execution paths or data flow, if a previous step identified a router, handler, or module import (e.g. `main.py` including `curriculum_router` from `app/api/curriculum.py`), your NEXT action MUST be to inspect that router or service file with `read_file`! Do not stop at the entrypoint.
 - TYPO RESILIENCE & SEARCH FALLBACK: If a literal `search_code` returned 0 matches, DO NOT try the exact same query again. Immediately switch to `semantic_search` or use `explore_tree` on subdirectories (`subpath='app'`, `subpath='src'`) to find where the feature lives.
 - GROUND TRUTH CITATIONS: Once key source files are identified from `explore_tree` or code searches, IMMEDIATELY call `read_file` to inspect the code and collect verifiable line citations. Line citations ONLY come from reading files.
+- INVENTORY / REPO-WIDE LISTS: When asked to list, inventory, or categorize all functions, classes, or endpoints across the repo, use search_symbols with query='' or query='*' and kind='function' to retrieve symbols in bulk, then inspect key modules with read_file.
 - State your rationale in one clear sentence.
 """
 
