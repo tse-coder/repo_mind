@@ -4,7 +4,7 @@
 
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-34%2F34%20Passed-emerald)](tests/unit/)
 [![Integration Tests](https://img.shields.io/badge/Integration%20Tests-13%2F13%20Passed-emerald)](tests/integration/)
-[![Evaluation Benchmark](https://img.shields.io/badge/Benchmark-6%2F6%20Passed%20(100%25)-blue)](EVALUATION_REPORT.md)
+[![Evaluation Benchmark](https://img.shields.io/badge/Benchmark-6%2F6%20Passed%20(100%25)-blue)](evaluation_report.pdf)
 [![Python Version](https://img.shields.io/badge/Python-3.13%20(uv)-slate)](pyproject.toml)
 
 ---
@@ -46,52 +46,7 @@ RepoMind employs a **Hybrid Agent Architecture** combining **Plan-and-Solve**, *
 
 ## 3. Architecture Diagram
 
-```mermaid
-flowchart TD
-    subgraph PLANNER["1. Planner"]
-        Intake["intake_node\n(Snapshot Pinning)"] --> Classify["classify_node\n(Query Type & Slots)"]
-        Classify --> ConditionClarify{Ambiguous?}
-        ConditionClarify -- "Yes" --> Clarify["clarify_node\n(interrupt())"] --> Plan["plan_node\n(Sub-Goals)"]
-        ConditionClarify -- "No" --> Plan
-    end
-
-    subgraph TOOLS["2. Tools & Execution"]
-        SelectAction["select_action_node\n(Action Selection)"] --> Policy["policy_check_node\n(PolicyGateway)"]
-        Policy -- "Approved" --> Execute["execute_tool_node\n(10 Read-Only Tools)"]
-        Policy -- "Denied" --> Observe
-        Execute --> Observe["observe_node\n(Extract Findings)"]
-    end
-
-    subgraph MEMORY["3. Memory & State"]
-        StateStore[("InvestigationState\n(Append-Only Reducers)")]
-        Observe <--> StateStore
-    end
-
-    subgraph DECISION["4. Decision & Routing"]
-        Evaluate{"evaluate_node\n(Central Router)"}
-        Reflect["reflect_node\n(Reflexion Loop)"]
-        Reconcile["reconcile_node\n(Code > Docs)"]
-    end
-
-    subgraph VALIDATION["5. Validation & Synthesis"]
-        Synthesize["synthesize_node\n(Draft Answer)"]
-        Verify["verify_node\n(Line Proof Check)"]
-        Answer["answer_node\n(Final Response)"]
-    end
-
-    Plan --> SelectAction
-    Observe --> Evaluate
-
-    Evaluate -- "Tool Error / Empty" --> Reflect --> SelectAction
-    Evaluate -- "Contradiction" --> Reconcile --> SelectAction
-    Evaluate -- "Need Evidence" --> SelectAction
-    Evaluate -- "Need Replan" --> Plan
-    Evaluate -- "Sufficient / Budget" --> Synthesize
-
-    Synthesize --> Verify
-    Verify -- "Valid Proofs" --> Answer --> END([Final Answer + Line Citations])
-    Verify -- "Missing Proofs" --> SelectAction
-```
+![RepoMind System Architecture](architecture_diagram.png)
 
 ---
 
@@ -191,7 +146,7 @@ The system is tested against 6 automated evaluation scenarios in [`backend/evalu
 | **5** | **Ambiguous Symbol Handling** | Disambiguation | ✅ **PASSED** | Detected dual `Handler` classes across separate packages and cited both. |
 | **6** | **Empty Repository Handling** | Boundary / Edge Case | ✅ **PASSED** | Handled 0-file directory cleanly, recording explicit limitations. |
 
-> **Overall Pass Rate:** **100% (6 / 6 Passed)**. Detailed empirical analysis and agentic logs are available in [`EVALUATION_REPORT.md`](EVALUATION_REPORT.md).
+> **Overall Pass Rate:** **100% (6 / 6 Passed)**. Detailed empirical analysis and agentic logs are available in [`evaluation_report.pdf`](evaluation_report.pdf).
 
 ---
 
