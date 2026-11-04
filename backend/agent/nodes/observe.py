@@ -93,7 +93,7 @@ def observe_node(state: InvestigationState) -> dict:
             new_findings.append(
                 Finding(
                     id=f"find_{uuid.uuid4().hex[:8]}",
-                    claim=f"Search '{raw_result.get('query')}' matched {len(matches)} lines across {len(set(m['file_path'] for m in matches))} files (e.g. {top['file_path']}:{top['line_number']}).",
+                    claim=f"Search '{raw_result.get('query')}' matched {len(matches)} lines across {len({m['file_path'] for m in matches})} files (e.g. {top['file_path']}:{top['line_number']}).",
                     evidence_ids=[new_evidence[0]["id"]],
                     confidence="INFERRED",
                     slot_id=target_slot,

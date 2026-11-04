@@ -4,7 +4,7 @@ classify_node — Analyzes the user question, determines category, entities, and
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 

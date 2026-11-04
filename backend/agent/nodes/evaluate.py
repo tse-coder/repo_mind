@@ -27,11 +27,10 @@ def evaluate_node(state: InvestigationState) -> dict:
         }
 
     # 2. Check last tool call for failure / timeout / policy denial
-    if last_call:
-        if last_call["status"] in ("ERROR", "TIMEOUT", "POLICY_DENIED"):
-            return {
-                "next_route": "reflect",
-            }
+    if last_call and last_call["status"] in ("ERROR", "TIMEOUT", "POLICY_DENIED"):
+        return {
+            "next_route": "reflect",
+        }
 
     # 3. Check for strategy retry exhaustion
     retry_ledger = dict(state.get("retry_ledger", {}))
@@ -80,11 +79,11 @@ def evaluate_node(state: InvestigationState) -> dict:
     # Minimum depth guard: Ensure we don't prematurely halt after just 1 step
     # unless it's a simple LOCATE where the symbol has already been directly inspected in code.
     is_premature = False
-    if step_count < 2:
-        if query_type in ("TRACE_FLOW", "ARCHITECTURE", "DEPENDENCY"):
-            is_premature = True
-        elif query_type == "LOCATE" and not inspected_code_files:
-            is_premature = True
+    if step_count < 2 and (
+        query_type in ("TRACE_FLOW", "ARCHITECTURE", "DEPENDENCY")
+        or (query_type == "LOCATE" and not inspected_code_files)
+    ):
+        is_premature = True
 
     # For TRACE_FLOW: require at least 2 steps (e.g. entrypoint + router/service)
     if query_type == "TRACE_FLOW" and step_count < 3 and len(inspected_code_files) < 2:

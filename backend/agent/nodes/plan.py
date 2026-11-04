@@ -5,6 +5,7 @@ plan_node — Creates or revises an investigation plan based on open evidence sl
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 

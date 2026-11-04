@@ -4,10 +4,6 @@ FastAPI route definitions for RepoMind investigation endpoints.
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException, status
 from sse_starlette.sse import EventSourceResponse
 
@@ -18,7 +14,6 @@ from backend.api.models import (
     ResumeRequest,
     StateResponse,
 )
-from backend.config import PROJECT_ROOT
 from backend.knowledge.snapshot import resolve_repo_path
 
 router = APIRouter(tags=["investigation"])

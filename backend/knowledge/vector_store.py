@@ -82,7 +82,7 @@ class RepoVectorStore:
         if self.collection.count() == 0:
             return []
 
-        query_embedding = list(self._embedding_model.embed([query]))[0].tolist()
+        query_embedding = next(iter(self._embedding_model.embed([query]))).tolist()
 
         where_filter = None
         if path_scope:

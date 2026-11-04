@@ -212,9 +212,8 @@ class RepoASTIndex:
     def get_symbol(self, symbol_name: str, file_path: str | None = None) -> SymbolInfo | None:
         """Retrieve exact symbol definition."""
         for s in self.symbols:
-            if s.name == symbol_name:
-                if file_path is None or s.file_path == file_path:
-                    return s
+            if s.name == symbol_name and (file_path is None or s.file_path == file_path):
+                return s
         return None
 
     def find_references(self, symbol_name: str) -> list[CallInfo]:

@@ -25,6 +25,7 @@ def _resolve_sha(repo_path: str) -> str:
                 capture_output=True,
                 text=True,
                 timeout=5,
+                check=False,
             )
             if result.returncode == 0:
                 return result.stdout.strip()[:12]

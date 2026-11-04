@@ -12,11 +12,10 @@ import logging
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from backend.agent.graph import create_investigation_app
 from backend.agent.state import InvestigationState
-from backend.policy.gateway import PolicyGateway
 
 logger = logging.getLogger("repomind.evaluation")
 
@@ -35,7 +34,7 @@ class ScenarioResult:
     steps_executed: int
     duration_seconds: float
     citations_count: int
-    agentic_behaviors: List[str]
+    agentic_behaviors: list[str]
     details: str
     output_snippet: str
 
@@ -51,8 +50,8 @@ class EvaluationHarness:
         repo_path: str,
         query: str,
         max_steps: int = 5,
-        thread_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        thread_id: str | None = None,
+    ) -> dict[str, Any]:
         """Invoke the LangGraph agent synchronously on a target repo."""
         if thread_id is None:
             thread_id = f"eval_{int(time.time() * 1000)}"
@@ -79,9 +78,9 @@ class EvaluationHarness:
         config = {"configurable": {"thread_id": thread_id}}
         return self.app.invoke(inputs, config=config)
 
-    def evaluate_all(self) -> List[ScenarioResult]:
+    def evaluate_all(self) -> list[ScenarioResult]:
         """Execute the full suite of adversarial and benchmark scenarios."""
-        results: List[ScenarioResult] = []
+        results: list[ScenarioResult] = []
 
         scenarios = [
             ("Happy Path Flow Tracing", self._test_happy_path),

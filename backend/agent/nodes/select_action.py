@@ -213,8 +213,8 @@ Step: {step_count + 1} of {state.get('max_steps', 20)}
                 "rationale": decision.rationale,
             },
         }
-    except Exception as e:
-        logger.error("Action selection LLM invocation failed: %s", e, exc_info=True)
+    except Exception:
+        logger.exception("Action selection LLM invocation failed")
         # Smart adaptive fallback avoiding repetition
         used_tools = {h["tool_slug"] for h in recent_history}
         if "explore_tree" not in used_tools:
