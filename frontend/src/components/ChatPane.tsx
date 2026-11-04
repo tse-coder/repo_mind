@@ -48,7 +48,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
   return (
     <div className="h-full flex flex-col min-h-0 bg-slate-50">
       {chat.state.error && (
-        <div className="mx-4 mt-3 p-2.5 bg-red-50 border border-red-200 text-red-800 text-xs font-mono">
+        <div className="mx-4 mt-3 p-3 bg-red-50 border border-red-200 text-red-800 text-xs font-mono rounded-xl">
           <strong>ERROR:</strong> {chat.state.error}
         </div>
       )}
@@ -74,8 +74,8 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
           return (
             <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
               {isUser ? (
-                /* User request box: subtle light background, light border, not black */
-                <div className="max-w-[80%] px-3.5 py-2.5 bg-slate-100 border border-slate-300 text-slate-900 rounded-none shadow-sm text-sm">
+                /* User request box: subtle light background, light border, rounded */
+                <div className="max-w-[80%] px-4 py-2.5 bg-slate-100 border border-slate-200/90 text-slate-900 rounded-2xl rounded-br-sm shadow-xs text-sm">
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                 </div>
               ) : (
@@ -96,7 +96,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
         })}
 
         {chat.state.limitations.length > 0 && chat.state.status !== 'RUNNING' && (
-          <div className="w-full p-2.5 bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-1">
+          <div className="w-full p-3 bg-amber-50 border border-amber-200 text-xs text-slate-700 space-y-1 rounded-xl">
             <div className="flex items-center gap-1.5 font-mono font-semibold text-amber-800 uppercase tracking-wider">
               <AlertCircle className="w-3.5 h-3.5" />
               Limitations
@@ -135,7 +135,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
               }
               rows={2}
               disabled={isInvestigating}
-              className="flex-1 bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
+              className="flex-1 bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 resize-none font-sans"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -146,7 +146,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
             <button
               type="submit"
               disabled={isInvestigating || !followUp.trim() || !chat.state.repo_path}
-              className="h-10 px-3 bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 border border-slate-900 transition"
+              className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:bg-slate-100 disabled:text-slate-400 border border-slate-900 transition shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               {isInvestigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </button>

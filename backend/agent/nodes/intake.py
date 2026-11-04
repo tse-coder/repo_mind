@@ -62,7 +62,7 @@ def intake_node(state: InvestigationState) -> dict:
         "current_tool_call": None,
         "retry_ledger": {},
         "step_count": 0,
-        "max_steps": DEFAULT_MAX_STEPS,
+        "max_steps": state.get("max_steps") or DEFAULT_MAX_STEPS,
         "consecutive_no_progress": 0,
         "clarification_count": 0,
         "draft_answer": None,

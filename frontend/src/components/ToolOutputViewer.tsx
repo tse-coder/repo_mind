@@ -44,11 +44,11 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
         <span className="text-slate-500 font-mono text-[11px] block">
           Output:
         </span>
-        <div className="inline-flex border border-slate-300 rounded-none bg-slate-100 p-0.5">
+        <div className="inline-flex border border-slate-200 rounded-lg bg-slate-100 p-0.5 shadow-xs">
           <button
             type="button"
             onClick={() => setMode('preview')}
-            className={`flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono transition ${
+            className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded-md transition ${
               mode === 'preview'
                 ? 'bg-white text-slate-900 font-semibold shadow-xs'
                 : 'text-slate-500 hover:text-slate-800'
@@ -60,7 +60,7 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
           <button
             type="button"
             onClick={() => setMode('raw')}
-            className={`flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono transition ${
+            className={`flex items-center gap-1 px-2 py-0.5 text-[10px] font-mono rounded-md transition ${
               mode === 'raw'
                 ? 'bg-white text-slate-900 font-semibold shadow-xs'
                 : 'text-slate-500 hover:text-slate-800'
@@ -73,7 +73,7 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
       </div>
 
       {mode === 'preview' ? (
-        <div className="p-2 bg-slate-50 text-xs overflow-x-auto max-h-60 rounded-none">
+        <div className="p-2.5 bg-slate-50 text-xs overflow-x-auto max-h-60 rounded-lg border border-slate-200/60">
           {isMarkdown ? (
             <MarkdownRenderer content={parsedJson.content} />
           ) : hasContent ? (
@@ -148,7 +148,7 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
           )}
         </div>
       ) : (
-        <pre className="p-2.5 rounded-none bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-100 overflow-x-auto max-h-48 whitespace-pre-wrap">
+        <pre className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-100 overflow-x-auto max-h-48 whitespace-pre-wrap">
           {summary}
         </pre>
       )}

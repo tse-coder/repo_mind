@@ -33,7 +33,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm flex flex-col space-y-4">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-200">
         <div className="flex items-center gap-2">
@@ -45,11 +45,11 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
         {displayText && (
           <div className="flex items-center gap-2">
             {/* View Mode Toggle: Preview / Raw */}
-            <div className="inline-flex border border-slate-300 rounded-none bg-slate-100 p-0.5">
+            <div className="inline-flex border border-slate-200 rounded-lg bg-slate-100 p-0.5 shadow-xs">
               <button
                 type="button"
                 onClick={() => setViewMode('preview')}
-                className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 text-xs font-mono rounded-md transition ${
                   viewMode === 'preview'
                     ? 'bg-white text-slate-900 font-semibold shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -62,7 +62,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
               <button
                 type="button"
                 onClick={() => setViewMode('raw')}
-                className={`flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition ${
+                className={`flex items-center gap-1 px-2.5 py-0.5 text-xs font-mono rounded-md transition ${
                   viewMode === 'raw'
                     ? 'bg-white text-slate-900 font-semibold shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -77,7 +77,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
             <button
               type="button"
               onClick={copyAnswer}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-slate-100 hover:bg-slate-200 text-xs font-mono text-slate-700 border border-slate-300 transition"
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-mono text-slate-700 border border-slate-300 transition shadow-xs cursor-pointer"
             >
               {copied ? (
                 <>
@@ -104,11 +104,11 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
       ) : (
         <div className="space-y-4">
           {/* Answer Content */}
-          <div className="p-4 rounded-none bg-slate-50 border border-slate-200 text-sm text-slate-900 font-sans leading-relaxed">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 font-sans leading-relaxed">
             {viewMode === 'preview' ? (
               <MarkdownRenderer content={displayText} />
             ) : (
-              <pre className="p-3 bg-slate-900 text-slate-100 font-mono text-xs whitespace-pre-wrap overflow-x-auto rounded-none border border-slate-800">
+              <pre className="p-3 bg-slate-900 text-slate-100 font-mono text-xs whitespace-pre-wrap overflow-x-auto rounded-lg border border-slate-800">
                 {displayText}
               </pre>
             )}
@@ -116,7 +116,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
 
           {/* Finding Confidence Ratings */}
           {findings.length > 0 && (
-            <div className="p-3.5 rounded-none bg-slate-50 border border-slate-200 space-y-2">
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="text-xs font-mono font-semibold text-slate-700 uppercase tracking-wider block flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-slate-600" /> Claim Verification Breakdown:
               </span>
@@ -124,7 +124,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
                 {findings.map((f, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs">
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded-none uppercase font-semibold shrink-0 border ${
+                      className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-semibold shrink-0 border ${
                         f.confidence === 'CONFIRMED'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
                           : f.confidence === 'INFERRED'
@@ -143,7 +143,7 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
 
           {/* Limitations and Knowledge Gaps */}
           {limitations.length > 0 && (
-            <div className="p-3.5 rounded-none bg-amber-50 border border-amber-200 space-y-1.5">
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5">
               <span className="text-xs font-mono font-semibold text-amber-800 uppercase tracking-wider block flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 text-amber-700" /> Knowledge Gaps & Unanswerable Slots:
               </span>

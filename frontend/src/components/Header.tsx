@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
       {/* Brand */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-slate-900 text-white rounded-none flex items-center justify-center font-mono font-bold text-xs tracking-wider">
+        <div className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center font-mono font-bold text-xs tracking-wider shadow-xs">
           RM
         </div>
         <div>
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Center Live Indicators */}
       <div className="flex items-center gap-2.5">
         {commitSha && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-slate-100 border border-slate-200 text-xs font-mono text-slate-700">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-xs font-mono text-slate-700">
             <GitBranch className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-slate-400">commit:</span>
             <span className="font-semibold text-slate-800">{commitSha}</span>
@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         {currentNode && (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-blue-50 border border-blue-200 text-xs font-mono text-blue-700">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-mono text-blue-700">
             <Activity className="w-3.5 h-3.5 text-blue-600 animate-spin" />
             <span>node: <strong>{currentNode}</strong></span>
           </div>
@@ -67,10 +67,10 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Backend API Health Status */}
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-slate-100 border border-slate-200 text-xs">
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-xs">
           {backendOnline === true && (
             <>
-              <span className="w-2 h-2 rounded-none bg-emerald-600" />
+              <span className="w-2 h-2 rounded-full bg-emerald-600" />
               <span className="text-slate-700 font-medium text-[11px]">API Online</span>
             </>
           )}
@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
           {backendOnline === null && (
             <>
-              <span className="w-2 h-2 rounded-none bg-slate-400" />
+              <span className="w-2 h-2 rounded-full bg-slate-400" />
               <span className="text-slate-500 text-[11px]">Connecting...</span>
             </>
           )}

@@ -20,8 +20,8 @@ class SecretMatch:
 
 SECRET_PATTERNS: dict[str, re.Pattern[str]] = {
     "AWS_ACCESS_KEY": re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
-    "AWS_SECRET_KEY": re.compile(r"(?i)aws_secret_access_key\s*=\s*['\"][A-Za-z0-9/+=]{40}['\"]"),
-    "GENERIC_API_KEY": re.compile(r"(?i)(?:api_key|apikey|secret_key|auth_token)\s*[:=]\s*['\"][A-Za-z0-9_\-]{20,}['\"]"),
+    "AWS_SECRET_KEY": re.compile(r"(?i)aws_secret_access_key\s*=\s*(?:\\\\*['\"])?[A-Za-z0-9/+=]{40}(?:\\\\*['\"])?"),
+    "GENERIC_API_KEY": re.compile(r"(?i)(?:api_key|apikey|secret_key|auth_token)\s*[:=]\s*(?:\\\\*['\"])?[A-Za-z0-9_\-]{20,}(?:\\\\*['\"])?"),
     "GITHUB_TOKEN": re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,255}\b"),
     "PRIVATE_KEY": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     "JWT_TOKEN": re.compile(r"\beyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\b"),

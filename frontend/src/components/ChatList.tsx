@@ -61,30 +61,30 @@ export const ChatList: React.FC<ChatListProps> = ({
           onClick={onNew}
           title="New investigation"
           aria-label="New investigation"
-          className="flex items-center justify-center p-1.5 bg-slate-900 text-white hover:bg-slate-800 border border-slate-900 transition cursor-pointer"
+          className="flex items-center justify-center p-1.5 bg-slate-900 text-white hover:bg-slate-800 border border-slate-900 rounded-lg transition shadow-xs cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 p-2">
         {ordered.length === 0 ? (
           <div className="p-6 text-center text-xs font-mono text-slate-400">
             No investigations yet. Start a query in the center pane.
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="space-y-1">
             {ordered.map((chat) => {
               const active = chat.id === activeChatId;
               return (
                 <li key={chat.id}>
                   <div
-                    className={`group flex items-start gap-2 px-3 py-2.5 cursor-pointer ${
-                      active ? 'bg-slate-100 border-l-2 border-l-slate-900' : 'hover:bg-slate-50 border-l-2 border-l-transparent'
+                    className={`group flex items-start gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition ${
+                      active ? 'bg-slate-100 text-slate-900 shadow-xs' : 'hover:bg-slate-50 text-slate-600'
                     }`}
                     onClick={() => onSelect(chat.id)}
                   >
-                    <span className={`mt-1.5 w-1.5 h-1.5 shrink-0 ${statusDot(chat.state.status)}`} />
+                    <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${statusDot(chat.state.status)}`} />
                     <div className="min-w-0 flex-1">
                       <div className="text-xs font-medium text-slate-900 truncate">
                         {chat.title || 'New investigation'}
@@ -106,7 +106,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                         e.stopPropagation();
                         onDelete(chat.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-600"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-slate-400 hover:text-red-600 transition"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

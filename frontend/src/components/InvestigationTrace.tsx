@@ -103,13 +103,13 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
     <div className="flex flex-col h-full bg-white min-h-0 overflow-y-auto">
       {/* 1. Goals Summary (Compact Checklist) */}
       {plan.length > 0 && (
-        <div className="p-3 border-b border-slate-100 bg-slate-50/70 space-y-1.5 shrink-0">
+        <div className="m-2.5 p-3 rounded-xl border border-slate-200/80 bg-slate-50/70 space-y-1.5 shrink-0 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
               Investigation Goals ({plan.filter((g) => g.status === 'COMPLETED').length}/{plan.length})
             </span>
             {planVersion > 1 && (
-              <span className="flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.2 rounded-none bg-amber-50 text-amber-800 border border-amber-200">
+              <span className="flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                 <RefreshCw className="w-2.5 h-2.5" /> v{planVersion}
               </span>
             )}
@@ -147,7 +147,7 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
           <span>Awaiting execution steps...</span>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100 flex-1 min-h-0">
+        <div className="divide-y divide-slate-100 flex-1 min-h-0 px-2 py-1">
           {toolCalls.map((tc, idx) => {
             const stepNum = String(idx + 1).padStart(2, '0');
             const isExpanded = expandedSteps[tc.id] ?? (idx === toolCalls.length - 1);
@@ -174,12 +174,14 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
               : null;
 
             return (
-              <div key={tc.id} className="transition-colors">
+              <div key={tc.id} className="py-0.5">
                 {/* Step Header (Clickable Dropdown Row) */}
                 <button
                   type="button"
                   onClick={() => toggleStep(tc.id)}
-                  className="w-full text-left px-3 py-2.5 flex items-center justify-between hover:bg-slate-50 transition cursor-pointer"
+                  className={`w-full text-left px-2.5 py-2 flex items-center justify-between rounded-lg transition cursor-pointer ${
+                    isExpanded ? 'bg-slate-50 text-slate-900 font-medium' : 'hover:bg-slate-50 text-slate-700'
+                  }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {isExpanded ? (
@@ -200,7 +202,7 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
 
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     {stepEvidence.length > 0 && (
-                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.2 border border-emerald-200">
+                      <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         +{stepEvidence.length}
                       </span>
                     )}
@@ -210,7 +212,7 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
 
                 {/* Step Dropdown Details (Plain, Border-Reduced, Visible) */}
                 {isExpanded && (
-                  <div className="px-4 py-3 space-y-3 text-xs border-t border-slate-100 bg-white">
+                  <div className="mx-1 my-1 px-3 py-2.5 space-y-3 text-xs rounded-lg border border-slate-100 bg-slate-50/30">
                     {/* Rationale */}
                     {tc.rationale && (
                       <div>

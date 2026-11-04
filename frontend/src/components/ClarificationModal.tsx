@@ -33,9 +33,9 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-300 rounded-none max-w-lg w-full p-6 shadow-xl space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-300">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center shrink-0 border border-slate-200 shadow-xs">
             <HelpCircle className="w-4 h-4" />
           </div>
           <div>
@@ -47,7 +47,7 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
         </div>
 
         {/* Question Prompt */}
-        <div className="p-3 bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed font-sans rounded-none">
+        <div className="p-3.5 bg-slate-50 border border-slate-200 text-xs text-slate-800 leading-relaxed font-sans rounded-xl">
           {prompt.question}
         </div>
 
@@ -62,7 +62,7 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
               onChange={(e) => setResponse(e.target.value)}
               placeholder="e.g. Focus on auth_service.py"
               rows={3}
-              className="w-full bg-white border border-slate-300 rounded-none px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
+              className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 resize-none font-sans"
               autoFocus
               required
             />
@@ -72,7 +72,7 @@ export const ClarificationModal: React.FC<ClarificationModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting || !response.trim()}
-              className="flex items-center gap-2 px-4 py-2 rounded-none bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900 shadow-xs"
             >
               {isSubmitting ? (
                 <>

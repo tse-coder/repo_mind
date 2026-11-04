@@ -42,7 +42,7 @@ def execute_tool_node(state: InvestigationState) -> dict:
         arguments=arguments,
         rationale=rationale,
         status=exec_status,
-        output_summary=framed_output[:250],
+        output_summary=framed_output[:1200],
         cached=False,
     )
 

@@ -87,7 +87,7 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-none p-5 shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Builtin Folder Selector Input */}
         <div>
@@ -105,12 +105,12 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
               directory=""
               onChange={handleFolderSelect}
               disabled={isLoading}
-              className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-mono file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer bg-slate-50 border border-slate-300 rounded-none p-1.5 focus:outline-none focus:border-slate-800"
+              className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-mono file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer bg-slate-50 border border-slate-300 rounded-lg p-1.5 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
             />
 
             {/* Live Path Resolution Feedback */}
             {resolvedInfo && (
-              <div className="text-[11px] font-mono px-2 py-1 bg-slate-50 border border-slate-200 rounded-none">
+              <div className="text-[11px] font-mono px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
                 {resolvedInfo.exists ? (
                   <div className="flex items-center text-emerald-700">
                     <span className="flex items-center gap-1.5 truncate">
@@ -140,7 +140,7 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter question about repository structure, flows, or symbols..."
             rows={3}
-            className="w-full bg-white border border-slate-300 rounded-none px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-800 resize-none font-sans"
+            className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 resize-none font-sans"
             disabled={isLoading}
             required
           />
@@ -162,7 +162,7 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
               className="w-28 accent-slate-900 cursor-pointer"
               disabled={isLoading}
             />
-            <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-none border border-slate-300">
+            <span className="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-300">
               {maxSteps}
             </span>
           </div>
@@ -170,7 +170,7 @@ export const RepoSelector: React.FC<RepoSelectorProps> = ({ onStart, isLoading }
           <button
             type="submit"
             disabled={isLoading || !repoPath.trim() || !query.trim() || (resolvedInfo !== null && !resolvedInfo.exists)}
-            className="flex items-center gap-2 px-5 py-2 rounded-none bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-mono font-medium transition cursor-pointer disabled:cursor-not-allowed border border-slate-900 shadow-xs"
           >
             {isLoading ? (
               <>
