@@ -62,6 +62,7 @@ PLAN_PROMPT = """You are a software investigation planner.
 Based on the user's question, query type, and open evidence slots, generate a concise, ordered list of 1 to 4 investigation goals.
 Each goal should be tied to an open evidence slot.
 Focus on finding concrete code definitions, usages, or flow steps using read-only tools.
+For ARCHITECTURE or "why was this designed this way" questions, include a goal that uses search_docs against README, docs/, and ADR records.
 Return your proposal strictly as a JSON object adhering to the PlanProposal schema.
 """
 
@@ -99,8 +100,17 @@ def plan_node(state: InvestigationState) -> dict:
         else llm.with_structured_output(PlanProposal)
     )
 
+    chat_history = state.get("chat_history", [])
+    history_ctx = ""
+    if len(chat_history) > 1:
+        past = [
+            f"{m['role'].upper()}: {m['content'][:250]}"
+            for m in chat_history[:-1][-3:]
+        ]
+        history_ctx = "Prior Conversation:\n" + "\n".join(past) + "\n"
+
     prompt_context = f"""
-Query: {query}
+{history_ctx}Query: {query}
 Type: {query_type}
 Open Evidence Slots: {', '.join(open_slots)}
 Existing Plan Goals: {[g['description'] for g in existing_plan]}

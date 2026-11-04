@@ -39,7 +39,9 @@ def answer_node(state: InvestigationState) -> dict:
         f"Steps executed: {step_count} | Evidence citations: {evidence_count}*"
     )
 
+    final_text = "\n\n".join(sections)
     return {
-        "final_answer": "\n\n".join(sections),
+        "final_answer": final_text,
         "status": status,
+        "chat_history": [{"role": "assistant", "content": final_text}],
     }

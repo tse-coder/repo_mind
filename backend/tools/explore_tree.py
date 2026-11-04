@@ -7,18 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-DEFAULT_EXCLUDED_DIRS = frozenset({
-    ".git",
-    "__pycache__",
-    ".pytest_cache",
-    "node_modules",
-    "venv",
-    ".venv",
-    "dist",
-    "build",
-    ".idea",
-    ".vscode",
-})
+from backend.config import DEFAULT_EXCLUDED_DIRS
 
 
 def explore_tree(

@@ -52,7 +52,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({ evidenceStore, fin
           <span>No evidence verified yet. Line citations will appear here.</span>
         </div>
       ) : (
-        <div className="space-y-3 overflow-y-auto max-h-[500px] pr-1">
+        <div className="space-y-3 overflow-y-auto flex-1 min-h-0 pr-1">
           {/* Findings */}
           {findings.length > 0 && (
             <div className="space-y-2 mb-3">

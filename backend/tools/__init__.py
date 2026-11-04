@@ -12,6 +12,7 @@ from backend.tools.get_relationships import get_relationships
 from backend.tools.get_symbol import get_symbol
 from backend.tools.read_file import read_file
 from backend.tools.search_code import search_code
+from backend.tools.search_docs import search_docs
 from backend.tools.search_symbols import search_symbols
 from backend.tools.semantic_search import semantic_search
 from backend.tools.trace_calls import trace_calls
@@ -26,6 +27,7 @@ TOOL_REGISTRY: dict[str, Callable[..., dict[str, Any]]] = {
     "get_relationships": get_relationships,
     "trace_calls": trace_calls,
     "semantic_search": semantic_search,
+    "search_docs": search_docs,
     "get_history": get_history,
 }
 

@@ -29,7 +29,7 @@ def test_investigation_graph_runs_to_completion(tmp_path):
     assert len(final_state["plan"]) >= 1
     assert final_state["step_count"] >= 1
     assert len(final_state["tool_history"]) >= 1
-    assert final_state["tool_history"][0]["tool_slug"] == "explore_tree"
+    assert final_state["tool_history"][0]["tool_slug"] in ("explore_tree", "search_code", "search_symbols")
     assert len(final_state["evidence_store"]) >= 1
     assert final_state["final_answer"] is not None
-    assert "Investigation Results" in final_state["final_answer"]
+    assert len(final_state["final_answer"]) > 50

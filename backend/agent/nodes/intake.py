@@ -40,10 +40,18 @@ def intake_node(state: InvestigationState) -> dict:
     """Initialize investigation context from the user's query and repo path."""
     repo_path = state["repo_path"]
     commit_sha = _resolve_sha(repo_path)
+    inv_id = state.get("investigation_id") or f"inv_{uuid.uuid4().hex[:8]}"
+    existing_history = state.get("chat_history") or []
+    query = state.get("query", "")
+
+    new_history = []
+    if query and (not existing_history or existing_history[-1].get("content") != query):
+        new_history.append({"role": "user", "content": query})
 
     return {
-        "investigation_id": f"inv_{uuid.uuid4().hex[:8]}",
+        "investigation_id": inv_id,
         "commit_sha": commit_sha,
+        "chat_history": new_history,
         "query_type": "",
         "entities": [],
         "needs_clarification": False,

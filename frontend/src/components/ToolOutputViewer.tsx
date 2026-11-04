@@ -36,6 +36,7 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
       parsedJson.content.includes('|'));
   const isSearchMatches = parsedJson && Array.isArray(parsedJson.matches) && parsedJson.matches.length > 0;
   const isTreeEntries = parsedJson && Array.isArray(parsedJson.entries) && parsedJson.entries.length > 0;
+  const isRagResults = parsedJson && Array.isArray(parsedJson.results) && parsedJson.results.length > 0;
 
   return (
     <div className="space-y-1.5">
@@ -102,6 +103,29 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
                   ))}
                 </tbody>
               </table>
+            </div>
+          ) : isRagResults ? (
+            <div className="space-y-2">
+              <span className="text-[10px] font-mono font-semibold text-slate-600 block">
+                Retrieved chunks ({parsedJson.results.length}):
+              </span>
+              {parsedJson.results.map((r: any, idx: number) => (
+                <div key={idx} className="p-2 bg-white border border-slate-200 space-y-1">
+                  <div className="flex items-center justify-between gap-2 font-mono text-[11px]">
+                    <span className="font-semibold text-slate-800 truncate">{r.file_path}</span>
+                    <span className="text-slate-500 shrink-0">
+                      L{r.start_line}{r.end_line !== r.start_line ? `-${r.end_line}` : ''}
+                      {typeof r.score === 'number' ? ` · ${r.score}` : ''}
+                    </span>
+                  </div>
+                  {r.heading && (
+                    <div className="text-[10px] font-mono text-slate-500">{r.heading}</div>
+                  )}
+                  <pre className="font-mono text-[11px] text-slate-800 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                    {r.snippet}
+                  </pre>
+                </div>
+              ))}
             </div>
           ) : isTreeEntries ? (
             <div className="space-y-1.5">

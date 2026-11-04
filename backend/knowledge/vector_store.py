@@ -24,21 +24,28 @@ class SemanticChunk:
     end_line: int
     content: str
     score: float = 0.0
+    heading: str = ""
 
 
 class RepoVectorStore:
     """Manages semantic embeddings and retrieval for a repository snapshot."""
 
-    def __init__(self, snapshot_id: str, persist_dir: str | None = None):
+    def __init__(
+        self,
+        snapshot_id: str,
+        persist_dir: str | None = None,
+        collection_prefix: str = "repo",
+    ):
         self.snapshot_id = snapshot_id
         self.persist_dir = persist_dir or CHROMA_PERSIST_DIR
         self._embedding_model = TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
 
         self._client = chromadb.PersistentClient(path=self.persist_dir)
-        collection_name = f"repo_{self.snapshot_id.replace('-', '_')}"
+        safe_id = self.snapshot_id.replace("-", "_")
+        collection_name = f"{collection_prefix}_{safe_id}"
         self.collection = self._client.get_or_create_collection(
             name=collection_name,
-            metadata={"snapshot_id": self.snapshot_id},
+            metadata={"snapshot_id": self.snapshot_id, "prefix": collection_prefix},
         )
 
     def is_indexed(self) -> bool:
@@ -58,6 +65,7 @@ class RepoVectorStore:
                 "file_path": c.file_path,
                 "start_line": c.start_line,
                 "end_line": c.end_line,
+                "heading": c.heading or "",
             }
             for c in chunks
         ]
@@ -106,6 +114,7 @@ class RepoVectorStore:
                     end_line=meta.get("end_line", 1),
                     content=doc,
                     score=score,
+                    heading=str(meta.get("heading", "") or ""),
                 )
             )
 

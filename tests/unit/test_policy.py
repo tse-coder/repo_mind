@@ -22,6 +22,18 @@ def test_policy_gateway_approved_tool():
     assert res.status == "APPROVED"
 
 
+def test_policy_gateway_allows_search_docs():
+    gateway = PolicyGateway(str(SAMPLE_REPO))
+    res = gateway.validate(
+        tool_slug="search_docs",
+        arguments={"query": "retry policy", "k": 5},
+        step_count=1,
+        max_steps=25,
+    )
+    assert res.allowed is True
+    assert res.status == "APPROVED"
+
+
 def test_policy_gateway_denied_disallowed_tool():
     gateway = PolicyGateway(str(SAMPLE_REPO))
     res = gateway.validate(

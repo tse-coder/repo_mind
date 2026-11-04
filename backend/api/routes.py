@@ -68,6 +68,7 @@ async def start_investigation(request: InvestigateRequest):
             repo_path=str(resolved_path),
             query=request.query,
             max_steps=request.max_steps,
+            session_id=request.session_id,
         )
         return InvestigateResponse(
             investigation_id=session.investigation_id,

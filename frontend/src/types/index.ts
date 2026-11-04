@@ -52,6 +52,42 @@ export interface ClarificationPrompt {
   clarification_count?: number;
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  maxSteps: number;
+  messages: ChatMessage[];
+  state: InvestigationState;
+}
+
+export function createEmptyInvestigation(partial?: Partial<InvestigationState>): InvestigationState {
+  return {
+    investigation_id: '',
+    status: 'IDLE',
+    repo_path: '',
+    query: '',
+    plan: [],
+    plan_version: 1,
+    toolCalls: [],
+    reflections: [],
+    evidenceStore: [],
+    findings: [],
+    tokens: [],
+    limitations: [],
+    clarificationPrompt: null,
+    ...partial,
+  };
+}
+
 export interface InvestigationState {
   investigation_id: string;
   status: 'IDLE' | 'INITIALIZED' | 'RUNNING' | 'PAUSED' | 'COMPLETED' | 'FAILED' | 'SUFFICIENT' | 'PARTIAL';

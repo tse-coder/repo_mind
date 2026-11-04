@@ -156,8 +156,8 @@ def observe_node(state: InvestigationState) -> dict:
                 if target_slot in updated_slots:
                     updated_slots[target_slot] = "SUPPORTED"
 
-    # 4. semantic_search
-    elif tool_slug == "semantic_search" and raw_result.get("status") == "SUCCESS":
+    # 4. semantic_search / search_docs
+    elif tool_slug in ("semantic_search", "search_docs") and raw_result.get("status") == "SUCCESS":
         results = raw_result.get("results", [])
         if results:
             top_r = results[0]
@@ -170,14 +170,16 @@ def observe_node(state: InvestigationState) -> dict:
                     end_line=top_r["end_line"],
                     content_hash=hashlib.sha256(top_r["snippet"].encode()).hexdigest()[:16],
                     snippet=top_r["snippet"][:300],
-                    tool_source="semantic_search",
+                    tool_source=tool_slug,
                     is_direct=False,
                 )
             )
+            heading = top_r.get("heading") or ""
+            heading_bit = f" ({heading})" if heading else ""
             new_findings.append(
                 Finding(
                     id=f"find_{uuid.uuid4().hex[:8]}",
-                    claim=f"Semantic match found in {top_r['file_path']}:{top_r['start_line']} (score: {top_r['score']}).",
+                    claim=f"Semantic match found in {top_r['file_path']}:{top_r['start_line']}{heading_bit} (score: {top_r['score']}).",
                     evidence_ids=[ev_id],
                     confidence="INFERRED",
                     slot_id=target_slot,

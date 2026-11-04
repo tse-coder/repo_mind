@@ -67,7 +67,7 @@ export const PlanChecklist: React.FC<PlanChecklistProps> = ({ plan, planVersion 
           <span>No plan generated yet. Goals will appear upon execution.</span>
         </div>
       ) : (
-        <div className="space-y-2 overflow-y-auto max-h-[380px] pr-1">
+        <div className="space-y-2 overflow-y-auto flex-1 min-h-0 pr-1">
           {plan.map((goal, index) => (
             <div
               key={goal.id || index}

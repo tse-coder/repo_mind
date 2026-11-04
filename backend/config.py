@@ -32,6 +32,20 @@ _default_model = "openai/gpt-oss-120b" if LLM_PROVIDER == "groq" else "gemini-1.
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", _default_model)
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0"))
 
+# ── Defaults & Filters ─────────────────────────────────────────────────────────
+DEFAULT_EXCLUDED_DIRS = frozenset({
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    "node_modules",
+    "venv",
+    ".venv",
+    "dist",
+    "build",
+    ".idea",
+    ".vscode",
+})
+
 # ── Agent Defaults ─────────────────────────────────────────────────────────────
 DEFAULT_MAX_STEPS = int(os.getenv("DEFAULT_MAX_STEPS", "20"))
 DEFAULT_MAX_CLARIFICATIONS = int(os.getenv("DEFAULT_MAX_CLARIFICATIONS", "2"))

@@ -27,6 +27,7 @@ class ToolDecision(BaseModel):
         "get_relationships",
         "trace_calls",
         "semantic_search",
+        "search_docs",
         "get_history",
         "finish",
     ] = Field(
@@ -93,14 +94,16 @@ Available Execution Tools:
 6. `find_references`: symbol_name (required) - finds who calls/references this symbol
 7. `get_relationships`: file_path (required), direction ('imports' | 'imported_by')
 8. `trace_calls`: entry_symbol (required), depth (default 3)
-9. `semantic_search`: query (natural language concept), k (default 5)
-10. `get_history`: file_path, max_commits (default 5)
-11. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
+9. `semantic_search`: query (natural language concept over source code), k (default 5)
+10. `search_docs`: query (why/design/architecture/policy questions), k (default 5) — heading-aware RAG over README, docs/, ADR/, RFC
+11. `get_history`: file_path, max_commits (default 5)
+12. `finish`: choose this if you have collected sufficient evidence and verified ground-truth line citations.
 
 Investigation Guidelines & Strict Rules:
 - NEVER repeat the exact same tool call with identical arguments as a previous step.
 - DO NOT search for the repository name itself (e.g. searching 'apex-book' inside apex-book repo). Search for technical concepts, identifiers, function names, classes, or keywords from the user question.
-- If a lexical search or symbol search returned 0 matches, DO NOT try the exact same query again. Use `explore_tree` to find relevant source directories, check `README.md`, or try `semantic_search`.
+- Use `search_docs` when the question is about *why* a design exists, ADRs, retry/session policies, documented architecture, or README intent. `semantic_search` is for code concepts; `search_docs` is for documentation.
+- If a lexical search or symbol search returned 0 matches, DO NOT try the exact same query again. Use `explore_tree` to find relevant source directories, check `README.md`, try `search_docs`, or try `semantic_search`.
 - Once key source files are identified from `explore_tree` or code searches, IMMEDIATELY call `read_file` to inspect the code and collect verifiable line citations. Line citations ONLY come from reading files.
 - State your rationale in one clear sentence.
 """
@@ -141,8 +144,17 @@ def select_action_node(state: InvestigationState) -> dict:
         else llm.with_structured_output(ToolDecision)
     )
 
+    chat_history = state.get("chat_history", [])
+    history_ctx = ""
+    if len(chat_history) > 1:
+        past = [
+            f"{m['role'].upper()}: {m['content'][:200]}"
+            for m in chat_history[:-1][-3:]
+        ]
+        history_ctx = "Prior Conversation:\n" + "\n".join(past) + "\n"
+
     context = f"""Target Repo: {state.get('repo_path')}
-User Query: {query}
+{history_ctx}User Query: {query}
 Open Evidence Slots: {open_slots}
 Active Plan Goals: {[g['description'] for g in plan if g['status'] == 'PENDING'][:2]}
 Verified Files Already Read: {inspected_files}

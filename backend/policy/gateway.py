@@ -34,6 +34,7 @@ ALLOWED_TOOL_SLUGS = frozenset({
     "get_relationships",
     "trace_calls",
     "semantic_search",
+    "search_docs",
     "get_history",
     # Meta tools
     "update_plan",

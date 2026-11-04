@@ -99,10 +99,19 @@ def classify_node(state: InvestigationState) -> dict:
         else llm.with_structured_output(QueryClassification)
     )
 
+    chat_history = state.get("chat_history", [])
+    history_ctx = ""
+    if len(chat_history) > 1:
+        past = [
+            f"{m['role'].upper()}: {m['content'][:300]}"
+            for m in chat_history[:-1][-4:]
+        ]
+        history_ctx = "Recent Dialogue Context:\n" + "\n".join(past) + "\n\n"
+
     try:
         result: QueryClassification = structured_llm.invoke([
             ("system", CLASSIFY_PROMPT),
-            ("human", f"User Question: {query}\nRepository Path: {state.get('repo_path')}"),
+            ("human", f"{history_ctx}User Question: {query}\nRepository Path: {state.get('repo_path')}"),
         ])
 
         # Map slots to "OPEN" status dict

@@ -34,6 +34,10 @@ class InvestigateRequest(BaseModel):
         le=50,
         description="Optional upper bound on tool execution steps (defaults to 5).",
     )
+    session_id: str | None = Field(
+        None,
+        description="Optional session/thread ID to continue an ongoing conversation.",
+    )
 
 
 class InvestigateResponse(BaseModel):

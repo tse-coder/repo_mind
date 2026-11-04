@@ -90,6 +90,7 @@ class InvestigationState(TypedDict):
     repo_path: str
     commit_sha: str
     query: str
+    chat_history: Annotated[list[dict[str, str]], operator.add]
 
     # ── Classification ─────────────────────────────────────────────────────────
     query_type: str  # "LOCATE" | "TRACE_FLOW" | "ARCHITECTURE" | "DEPENDENCY" | "ERROR_ORIGIN" | "MIXED"

@@ -4,6 +4,7 @@ Unit tests for all 10 execution tools, snapshot resolver, and secret scanner.
 
 from pathlib import Path
 
+from backend.knowledge.docs_index import chunk_markdown_by_headings, discover_doc_files
 from backend.knowledge.secret_scanner import redact_secrets, scan_for_secrets
 from backend.knowledge.snapshot import get_snapshot_info
 from backend.tools import dispatch_tool
@@ -13,6 +14,7 @@ from backend.tools.get_relationships import get_relationships
 from backend.tools.get_symbol import get_symbol
 from backend.tools.read_file import read_file
 from backend.tools.search_code import search_code
+from backend.tools.search_docs import search_docs
 from backend.tools.search_symbols import search_symbols
 from backend.tools.semantic_search import semantic_search
 from backend.tools.trace_calls import trace_calls
@@ -114,6 +116,38 @@ def test_semantic_search(tmp_path):
     assert res["status"] == "SUCCESS"
     assert res["result_count"] >= 1
     assert any("auth" in r["file_path"].lower() for r in res["results"])
+
+
+def test_discover_doc_files():
+    files = discover_doc_files(SAMPLE_REPO)
+    rels = {str(p.relative_to(SAMPLE_REPO)) for p in files}
+    assert "README.md" in rels
+    assert "docs/adr/0001-session-storage.md" in rels
+    assert "docs/retry-policy.md" in rels
+    assert not any(p.suffix == ".py" for p in files)
+
+
+def test_chunk_markdown_by_headings():
+    adr = SAMPLE_REPO / "docs" / "adr" / "0001-session-storage.md"
+    chunks = chunk_markdown_by_headings(adr, SAMPLE_REPO)
+    assert len(chunks) >= 2
+    headings = {c.heading for c in chunks}
+    assert any("Redis for Session Storage" in h for h in headings)
+    assert any("Decision" in h for h in headings)
+    assert any("Redis over Memcached" in c.content for c in chunks)
+
+
+def test_search_docs():
+    res = search_docs(
+        str(SAMPLE_REPO),
+        query="Why did we choose Redis over Memcached for session storage?",
+        k=3,
+    )
+    assert res["status"] == "SUCCESS"
+    assert res["result_count"] >= 1
+    joined = " ".join(r["snippet"].lower() + r["file_path"].lower() for r in res["results"])
+    assert "redis" in joined
+    assert any("adr" in r["file_path"].lower() or "docs" in r["file_path"].lower() for r in res["results"])
 
 
 def test_dispatch_tool():

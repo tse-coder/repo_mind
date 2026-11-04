@@ -75,7 +75,7 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
           <span>No tools executed yet. Activity logs stream here.</span>
         </div>
       ) : (
-        <div className="space-y-2.5 overflow-y-auto max-h-[500px] pr-1">
+        <div className="space-y-2.5 overflow-y-auto flex-1 min-h-0 pr-1">
           {toolCalls.map((tc, idx) => {
             const isExpanded = expandedItems[tc.id] ?? (idx === toolCalls.length - 1);
             return (

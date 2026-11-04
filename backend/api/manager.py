@@ -124,6 +124,7 @@ class InvestigationManager:
         repo_path: str,
         query: str,
         max_steps: int | None = None,
+        session_id: str | None = None,
     ) -> InvestigationSession:
         """Validate input, mint an investigation ID, and schedule background run."""
         resolved_path = resolve_repo_path(repo_path)
@@ -132,16 +133,26 @@ class InvestigationManager:
         if not resolved_path.is_dir():
             raise NotADirectoryError(f"Repository path is not a directory: {repo_path}")
 
-        investigation_id = f"inv_{uuid.uuid4().hex[:8]}"
+        investigation_id = session_id or f"inv_{uuid.uuid4().hex[:8]}"
         steps = max_steps if max_steps is not None else DEFAULT_MAX_STEPS
 
-        session = InvestigationSession(
-            investigation_id=investigation_id,
-            repo_path=str(resolved_path),
-            query=query,
-            max_steps=steps,
-        )
-        self._sessions[investigation_id] = session
+        # If reusing an existing session ID, reset its event queue and state for follow-up
+        existing = self._sessions.get(investigation_id)
+        if existing:
+            existing.query = query
+            existing.max_steps = steps
+            existing.status = "INITIALIZED"
+            existing.event_history = []
+            existing.clarification_prompt = None
+            session = existing
+        else:
+            session = InvestigationSession(
+                investigation_id=investigation_id,
+                repo_path=str(resolved_path),
+                query=query,
+                max_steps=steps,
+            )
+            self._sessions[investigation_id] = session
 
         # Launch background graph run
         session.background_task = asyncio.create_task(
@@ -200,6 +211,7 @@ class InvestigationManager:
                     "evidence_store": [],
                     "findings": [],
                     "reflections": [],
+                    "chat_history": [{"role": "user", "content": session.query}],
                     "evidence_slots": {},
                     "plan": [],
                     "plan_version": 1,
