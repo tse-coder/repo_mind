@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Terminal, ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle, ShieldAlert } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, XCircle, AlertCircle, ShieldAlert } from 'lucide-react';
 import { ToolCallItem, ReflectionItem } from '../types';
 import { ToolOutputViewer } from './ToolOutputViewer';
 
@@ -24,58 +24,45 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
     switch (status) {
       case 'SUCCESS':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-none bg-emerald-50 text-emerald-700 border border-emerald-300">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> SUCCESS
+          <span title="Success" className="flex items-center">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           </span>
         );
       case 'ERROR':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-none bg-red-50 text-red-700 border border-red-300">
-            <XCircle className="w-3 h-3 text-red-600" /> ERROR
+          <span title="Error" className="flex items-center">
+            <XCircle className="w-4 h-4 text-red-600 shrink-0" />
           </span>
         );
       case 'POLICY_DENIED':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-none bg-purple-50 text-purple-700 border border-purple-300">
-            <ShieldAlert className="w-3 h-3 text-purple-600" /> BLOCKED
+          <span title="Blocked" className="flex items-center">
+            <ShieldAlert className="w-4 h-4 text-purple-600 shrink-0" />
           </span>
         );
       case 'TIMEOUT':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-none bg-amber-50 text-amber-700 border border-amber-300">
-            <AlertCircle className="w-3 h-3 text-amber-600" /> TIMEOUT
+          <span title="Timeout" className="flex items-center">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
           </span>
         );
       default:
         return (
-          <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-none bg-slate-100 text-slate-600 border border-slate-300">
-            PENDING
+          <span title="Pending" className="flex items-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-300 animate-pulse inline-block" />
           </span>
         );
     }
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-none p-4 flex flex-col h-full shadow-sm">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
-        <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-slate-700" />
-          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
-            Tool Activity Feed
-          </h2>
-        </div>
-        <span className="text-xs font-mono text-slate-500">
-          {toolCalls.length} executed
-        </span>
-      </div>
-
+    <div className="p-3 flex flex-col h-full bg-white overflow-hidden">
       {toolCalls.length === 0 && reflections.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400 text-xs font-mono">
-          <Terminal className="w-6 h-6 mb-2 stroke-1 text-slate-300" />
           <span>No tools executed yet. Activity logs stream here.</span>
         </div>
       ) : (
-        <div className="space-y-2.5 overflow-y-auto flex-1 min-h-0 pr-1">
+        <div className="space-y-2 overflow-y-auto flex-1 min-h-0 pr-1">
           {toolCalls.map((tc, idx) => {
             const isExpanded = expandedItems[tc.id] ?? (idx === toolCalls.length - 1);
             return (
@@ -98,11 +85,11 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
                     <span className="text-xs font-mono font-bold text-slate-900">
                       {tc.tool}
                     </span>
-                    <span className="text-xs text-slate-600 truncate max-w-[260px] sm:max-w-[340px]">
+                    <span className="text-xs text-slate-600 truncate max-w-[220px] sm:max-w-[300px]">
                       {tc.rationale}
                     </span>
                   </div>
-                  <div>{getToolStatusBadge(tc.status)}</div>
+                  <div className="shrink-0 ml-2">{getToolStatusBadge(tc.status)}</div>
                 </button>
 
                 {/* Collapsible Details */}
@@ -140,24 +127,21 @@ export const ToolActivityFeed: React.FC<ToolActivityFeedProps> = ({ toolCalls, r
             );
           })}
 
-          {/* Reflexion self-critiques */}
+          {/* Reflections */}
           {reflections.map((ref) => (
             <div
               key={ref.id}
-              className="p-3 rounded-none border border-amber-300 bg-amber-50 space-y-1 text-xs font-mono"
+              className="p-3 rounded-none bg-amber-50 border border-amber-200 space-y-1 text-xs"
             >
-              <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+              <div className="flex items-center gap-1.5 font-mono font-bold text-amber-800">
                 <AlertCircle className="w-3.5 h-3.5" />
-                <span>Reflexion Diagnosis</span>
+                <span>Reflexion Diagnostic: {ref.trigger}</span>
               </div>
-              <p className="text-slate-700 text-xs">
-                <span className="text-slate-500">Trigger:</span> {ref.trigger}
+              <p className="text-amber-900 font-sans">
+                <strong>Diagnosis:</strong> {ref.diagnosis}
               </p>
-              <p className="text-slate-700 text-xs">
-                <span className="text-slate-500">Diagnosis:</span> {ref.diagnosis}
-              </p>
-              <p className="text-emerald-800 text-xs font-medium">
-                <span className="text-slate-500">Adjustment:</span> {ref.next_approach}
+              <p className="text-amber-900 font-sans">
+                <strong>Next Approach:</strong> {ref.next_approach}
               </p>
             </div>
           ))}

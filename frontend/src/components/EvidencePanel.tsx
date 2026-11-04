@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, FileCode, Hash, Check, Copy } from 'lucide-react';
+import { FileCode, Hash, Check, Copy } from 'lucide-react';
 import { EvidenceItem, FindingItem } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
@@ -33,19 +33,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({ evidenceStore, fin
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-none p-4 flex flex-col h-full shadow-sm">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
-        <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-slate-700" />
-          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
-            Evidence Store & Line Citations
-          </h2>
-        </div>
-        <span className="text-xs font-mono text-slate-500">
-          {evidenceStore.length} verified
-        </span>
-      </div>
-
+    <div className="p-3 flex flex-col h-full bg-white overflow-hidden">
       {evidenceStore.length === 0 && findings.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400 text-xs font-mono">
           <FileCode className="w-6 h-6 mb-2 stroke-1 text-slate-300" />
@@ -128,7 +116,7 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({ evidenceStore, fin
                   <button
                     type="button"
                     onClick={() => copyToClipboard(ev.snippet, ev.id)}
-                    className="absolute top-1.5 right-1.5 p-1 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                    className="absolute top-1.5 right-1.5 p-1 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
                     title="Copy snippet"
                   >
                     {copiedId === ev.id ? (

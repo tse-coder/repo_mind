@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, CircleDashed, Clock, AlertTriangle, RefreshCw, ListOrdered } from 'lucide-react';
+import { CheckCircle2, CircleDashed, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 import { PlanGoal } from '../types';
 
 interface PlanChecklistProps {
@@ -39,26 +39,14 @@ export const PlanChecklist: React.FC<PlanChecklistProps> = ({ plan, planVersion 
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-none p-4 flex flex-col h-full shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
-        <div className="flex items-center gap-2">
-          <ListOrdered className="w-4 h-4 text-slate-700" />
-          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800">
-            Investigation Plan
-          </h2>
-        </div>
-        <div className="flex items-center gap-1.5">
-          {planVersion > 1 && (
-            <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-amber-50 text-amber-700 border border-amber-300">
-              <RefreshCw className="w-2.5 h-2.5" /> v{planVersion}
-            </span>
-          )}
-          <span className="text-[11px] font-mono px-2 py-0.5 rounded-none bg-slate-100 text-slate-700 border border-slate-300">
-            v{planVersion}
+    <div className="p-3 flex flex-col h-full bg-white overflow-hidden">
+      {planVersion > 1 && (
+        <div className="flex items-center justify-end mb-2">
+          <span className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-amber-50 text-amber-700 border border-amber-300">
+            <RefreshCw className="w-2.5 h-2.5" /> replanned (v{planVersion})
           </span>
         </div>
-      </div>
+      )}
 
       {/* Checklist Items */}
       {plan.length === 0 ? (
