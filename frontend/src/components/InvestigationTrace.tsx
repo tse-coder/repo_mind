@@ -208,30 +208,30 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
                   </div>
                 </button>
 
-                {/* Step Dropdown Details (Plain, Unboxed, Visible) */}
+                {/* Step Dropdown Details (Plain, Border-Reduced, Visible) */}
                 {isExpanded && (
-                  <div className="px-4 py-3 bg-slate-50/50 space-y-3 text-xs border-t border-slate-100">
+                  <div className="px-4 py-3 space-y-3 text-xs border-t border-slate-100 bg-white">
                     {/* Rationale */}
                     {tc.rationale && (
                       <div>
                         <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
                           Rationale
                         </span>
-                        <p className="text-slate-800 text-xs leading-relaxed">{tc.rationale}</p>
+                        <p className="text-slate-700 text-xs leading-relaxed">{tc.rationale}</p>
                       </div>
                     )}
 
-                    {/* Arguments (clean inline key-values) */}
+                    {/* Arguments (clean plain inline list) */}
                     {tc.arguments && Object.keys(tc.arguments).length > 0 && (
                       <div>
                         <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 block mb-1">
                           Parameters
                         </span>
-                        <div className="space-y-0.5 font-mono text-[11px] text-slate-700 bg-white p-2 border border-slate-200">
+                        <div className="space-y-0.5 font-mono text-[11px] text-slate-700 pl-2 border-l border-slate-200">
                           {Object.entries(tc.arguments).map(([key, val]) => (
-                            <div key={key} className="flex gap-1.5">
+                            <div key={key} className="flex gap-1.5 py-0.5">
                               <span className="text-slate-400">{key}:</span>
-                              <span className="text-slate-900 font-medium break-all">
+                              <span className="text-slate-800 font-medium break-all">
                                 {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                               </span>
                             </div>
@@ -252,22 +252,22 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
 
                     {/* Evidence & Line Citations Discovered */}
                     {stepEvidence.length > 0 && (
-                      <div className="space-y-2 pt-1 border-t border-slate-200">
+                      <div className="space-y-2 pt-1 border-t border-slate-100">
                         <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           Verified Citations ({stepEvidence.length})
                         </span>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           {stepEvidence.map((ev) => (
                             <div
                               key={ev.id}
-                              className="p-2 bg-white border border-slate-200 space-y-1"
+                              className="py-1 space-y-1 border-l-2 border-emerald-500/70 pl-2.5"
                             >
                               <div className="flex items-center justify-between font-mono text-[11px]">
-                                <span className="font-semibold text-slate-900 truncate">
+                                <span className="font-semibold text-slate-800 truncate">
                                   {ev.file_path}
                                 </span>
-                                <span className="text-slate-500 shrink-0">
+                                <span className="text-slate-400 shrink-0 text-[10px]">
                                   L{ev.start_line}{ev.end_line !== ev.start_line ? `-${ev.end_line}` : ''}
                                 </span>
                               </div>
@@ -278,7 +278,7 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
                                       <MarkdownRenderer content={ev.snippet} />
                                     </div>
                                   ) : (
-                                    <pre className="p-1.5 bg-slate-100 font-mono text-[10px] text-slate-800 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                                    <pre className="p-1.5 bg-slate-50 font-mono text-[10px] text-slate-700 whitespace-pre-wrap max-h-24 overflow-y-auto">
                                       {ev.snippet}
                                     </pre>
                                   )}
@@ -304,40 +304,42 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
 
                     {/* Findings Discovered */}
                     {stepFindings.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
-                        <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500 block">
-                          Derived Findings:
+                      <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                        <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 block">
+                          Derived Findings
                         </span>
-                        {stepFindings.map((f, fIdx) => (
-                          <div
-                            key={f.id || fIdx}
-                            className="p-2 bg-white border border-slate-200 text-xs space-y-1"
-                          >
-                            <span
-                              className={`text-[9px] font-mono font-semibold px-1 py-0.2 uppercase border ${getConfidenceBadge(
-                                f.confidence
-                              )}`}
+                        <div className="space-y-2">
+                          {stepFindings.map((f, fIdx) => (
+                            <div
+                              key={f.id || fIdx}
+                              className="py-1 text-xs space-y-1 border-l-2 border-slate-300 pl-2.5"
                             >
-                              {f.confidence}
-                            </span>
-                            <p className="text-slate-800 leading-snug">{f.claim}</p>
-                          </div>
-                        ))}
+                              <span
+                                className={`text-[9px] font-mono font-semibold px-1 py-0.2 uppercase border ${getConfidenceBadge(
+                                  f.confidence
+                                )}`}
+                              >
+                                {f.confidence}
+                              </span>
+                              <p className="text-slate-700 leading-snug">{f.claim}</p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* Reflexion Self-Critique (only if failed) */}
                     {stepReflection && (
-                      <div className="p-2 bg-amber-50 border border-amber-200 text-xs space-y-1">
+                      <div className="py-1 space-y-1 text-xs border-l-2 border-amber-500 pl-2.5">
                         <div className="flex items-center gap-1 font-mono font-bold text-amber-800 text-[10px] uppercase">
                           <AlertCircle className="w-3 h-3" />
                           Reflexion Diagnosis
                         </div>
-                        <p className="text-amber-900 text-xs">
-                          <strong>Diagnosis:</strong> {stepReflection.diagnosis}
+                        <p className="text-slate-800 text-xs">
+                          <span className="text-slate-500">Diagnosis:</span> {stepReflection.diagnosis}
                         </p>
-                        <p className="text-amber-900 text-xs">
-                          <strong>Next approach:</strong> {stepReflection.next_approach}
+                        <p className="text-slate-800 text-xs">
+                          <span className="text-slate-500">Next approach:</span> {stepReflection.next_approach}
                         </p>
                       </div>
                     )}
@@ -351,3 +353,4 @@ export const InvestigationTrace: React.FC<InvestigationTraceProps> = ({
     </div>
   );
 };
+

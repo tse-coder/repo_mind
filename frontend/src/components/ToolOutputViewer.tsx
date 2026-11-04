@@ -73,7 +73,7 @@ export const ToolOutputViewer: React.FC<ToolOutputViewerProps> = ({ tool, summar
       </div>
 
       {mode === 'preview' ? (
-        <div className="p-2.5 bg-slate-50 border border-slate-200 text-xs overflow-x-auto max-h-60 rounded-none">
+        <div className="p-2 bg-slate-50 text-xs overflow-x-auto max-h-60 rounded-none">
           {isMarkdown ? (
             <MarkdownRenderer content={parsedJson.content} />
           ) : hasContent ? (
