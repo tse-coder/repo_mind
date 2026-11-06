@@ -32,15 +32,9 @@ export const ThoughtProcess: React.FC<ThoughtProcessProps> = ({
   plan = [],
   reflections = [],
 }) => {
-  const [isOpen, setIsOpen] = useState<boolean>(isInvestigating);
+  // Collapsed by default
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
-
-  // Automatically expand parent dropdown while actively investigating
-  useEffect(() => {
-    if (isInvestigating) {
-      setIsOpen(true);
-    }
-  }, [isInvestigating]);
 
   const toggleStep = (id: string) => {
     setExpandedSteps((prev) => ({
@@ -230,8 +224,7 @@ export const ThoughtProcess: React.FC<ThoughtProcessProps> = ({
         <div className="border-l border-slate-200/90 ml-2 pl-3 py-1 space-y-2.5 mt-1 mb-2 font-sans text-xs">
           {/* Plan formulated step */}
           {plan.length > 0 && (
-            <div className="relative flex items-start gap-2 text-slate-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0" />
+            <div className="relative flex items-start text-slate-500">
               <div className="space-y-0.5">
                 <div className="text-slate-600 font-medium text-[11px]">
                   Formulated investigation plan ({plan.length} goals)
@@ -257,18 +250,7 @@ export const ThoughtProcess: React.FC<ThoughtProcessProps> = ({
             const args = tc.arguments || {};
 
             return (
-              <div key={stepId} className="relative flex items-start gap-2">
-                {/* Timeline connector dot */}
-                <span
-                  className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                    isPending
-                      ? 'bg-blue-500 animate-pulse'
-                      : tc.status === 'ERROR'
-                      ? 'bg-amber-400'
-                      : 'bg-slate-300'
-                  }`}
-                />
-
+              <div key={stepId} className="relative flex items-start">
                 <div className="min-w-0 max-w-2xl flex-1 space-y-1">
                   {/* Step Title Row (Clickable sub-dropdown header) */}
                   <div
@@ -434,8 +416,7 @@ export const ThoughtProcess: React.FC<ThoughtProcessProps> = ({
 
           {/* Reflections */}
           {reflections.map((ref, idx) => (
-            <div key={ref.id || idx} className="relative flex items-start gap-2 text-slate-500">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+            <div key={ref.id || idx} className="relative flex items-start text-slate-500">
               <div className="space-y-0.5 text-[11px]">
                 <div className="text-purple-700 font-medium">Reflecting on approach</div>
                 <p className="text-slate-500 font-mono text-[10px]">{ref.diagnosis}</p>
@@ -450,10 +431,9 @@ export const ThoughtProcess: React.FC<ThoughtProcessProps> = ({
 
           {/* Active bottom node indicator when investigating */}
           {isInvestigating && (!latestTool || latestTool.status !== 'PENDING') && (
-            <div className="relative flex items-center gap-2 text-slate-400 text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
-              <span className="flex items-center gap-1.5 font-medium text-slate-500">
-                <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            <div className="relative flex items-center gap-1.5 text-slate-400 text-[11px]">
+              <Loader2 className="w-3 h-3 animate-spin shrink-0 text-slate-400" />
+              <span className="font-medium text-slate-500">
                 {activeVerb}
               </span>
             </div>
