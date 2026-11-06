@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { GitBranch, AlertCircle } from 'lucide-react';
+import { UserNav } from './UserNav';
 
 interface HeaderProps {
   currentNode?: string;
@@ -57,8 +58,8 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Backend API Health Status */}
-      <div className="flex items-center gap-2">
+      {/* Right Actions: API Health & Auth */}
+      <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-xs">
           {backendOnline === true && (
             <>
@@ -79,6 +80,8 @@ export const Header: React.FC<HeaderProps> = ({
             </>
           )}
         </div>
+
+        <UserNav />
       </div>
     </header>
   );

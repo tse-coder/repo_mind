@@ -4,7 +4,10 @@ FastAPI route definitions for RepoMind investigation endpoints.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from backend.api.manager import manager
@@ -14,7 +17,9 @@ from backend.api.models import (
     ResumeRequest,
     StateResponse,
 )
+from backend.db.supabase import db_manager
 from backend.knowledge.snapshot import resolve_repo_path
+from backend.security.auth import AuthUser, get_current_user_optional, require_current_user
 
 router = APIRouter(tags=["investigation"])
 
@@ -47,7 +52,10 @@ async def resolve_path_endpoint(path: str):
     status_code=status.HTTP_201_CREATED,
     summary="Start a new repository investigation",
 )
-async def start_investigation(request: InvestigateRequest):
+async def start_investigation(
+    request: InvestigateRequest,
+    current_user: AuthUser = Depends(get_current_user_optional),
+):
     """
     Validate repository path, mint an investigation ID, and schedule background investigation.
     """
@@ -59,11 +67,13 @@ async def start_investigation(request: InvestigateRequest):
         )
 
     try:
+        user_id = current_user.id if current_user.is_authenticated else None
         session = manager.create_session(
             repo_path=str(resolved_path),
             query=request.query,
             max_steps=request.max_steps,
             session_id=request.session_id,
+            user_id=user_id,
         )
         return InvestigateResponse(
             investigation_id=session.investigation_id,
@@ -178,3 +188,66 @@ async def get_investigation_state(investigation_id: str):
         limitations=state.get("limitations", []),
         clarification_prompt=session.clarification_prompt,
     )
+
+
+# ── User & Chat Persistence Endpoints ──────────────────────────────────────────
+
+
+class SaveChatRequest(BaseModel):
+    chat_id: str
+    title: str = "New Investigation"
+    repo_path: str
+    max_steps: int = 15
+    messages: list[dict[str, Any]] = Field(default_factory=list)
+
+
+@router.get("/me", summary="Get current authenticated user profile")
+async def get_me(current_user: AuthUser = Depends(get_current_user_optional)):
+    """Return user info for the active session."""
+    return current_user
+
+
+@router.get("/chat/sessions", summary="List chat sessions for the authenticated user")
+async def get_user_chat_sessions(current_user: AuthUser = Depends(require_current_user)):
+    """Return all persistent chat sessions for the logged in user."""
+    sessions = await db_manager.list_chat_sessions(current_user.id)
+    return {"sessions": sessions}
+
+
+@router.post("/chat/sessions", summary="Save or update a chat session and its messages")
+async def save_user_chat_session(
+    payload: SaveChatRequest,
+    current_user: AuthUser = Depends(get_current_user_optional),
+):
+    """Save or update chat session metadata and messages in PostgreSQL/Supabase."""
+    user_id = current_user.id if current_user.is_authenticated else None
+    await db_manager.save_chat_session(
+        chat_id=payload.chat_id,
+        user_id=user_id,
+        title=payload.title,
+        repo_path=payload.repo_path,
+        max_steps=payload.max_steps,
+    )
+
+    for msg in payload.messages:
+        msg_id = msg.get("id") or f"msg_{payload.chat_id}_{msg.get('role')}_{msg.get('timestamp')}"
+        await db_manager.save_chat_message(
+            message_id=msg_id,
+            chat_id=payload.chat_id,
+            role=msg.get("role", "user"),
+            content=msg.get("content", ""),
+            thoughts=msg.get("thoughts"),
+        )
+
+    return {"status": "ok", "chat_id": payload.chat_id}
+
+
+@router.get("/chat/sessions/{chat_id}/messages", summary="Get messages for a chat session")
+async def get_chat_messages(
+    chat_id: str,
+    current_user: AuthUser = Depends(get_current_user_optional),
+):
+    """Return all messages belonging to a chat session."""
+    messages = await db_manager.get_chat_messages(chat_id)
+    return {"chat_id": chat_id, "messages": messages}
+

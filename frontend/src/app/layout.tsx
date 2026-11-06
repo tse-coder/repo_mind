@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
   title: 'RepoMind — Repository Investigation Agent',
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased font-sans">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

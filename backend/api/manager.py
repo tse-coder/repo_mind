@@ -19,6 +19,7 @@ from langgraph.types import Command
 
 from backend.agent.graph import create_investigation_app
 from backend.config import DEFAULT_MAX_STEPS
+from backend.db.supabase import db_manager
 from backend.knowledge.snapshot import resolve_repo_path
 
 logger = logging.getLogger("repomind.manager")
@@ -49,12 +50,14 @@ class InvestigationSession:
         repo_path: str,
         query: str,
         max_steps: int,
+        user_id: str | None = None,
     ):
         self.investigation_id = investigation_id
         self.thread_id = investigation_id
         self.repo_path = repo_path
         self.query = query
         self.max_steps = max_steps
+        self.user_id = user_id
         self.status = "INITIALIZED"  # INITIALIZED, RUNNING, PAUSED, COMPLETED, FAILED
         self.current_node: str | None = None
         self.state_values: dict[str, Any] = {}
@@ -118,12 +121,19 @@ class InvestigationManager:
         self.checkpointer = MemorySaver()
         self.app = create_investigation_app(checkpointer=self.checkpointer)
 
+    def set_checkpointer(self, checkpointer):
+        """Update checkpointer (e.g. switching to Supabase AsyncPostgresSaver)."""
+        self.checkpointer = checkpointer
+        self.app = create_investigation_app(checkpointer=self.checkpointer)
+        logger.info("InvestigationManager compiled with checkpointer: %s", type(checkpointer).__name__)
+
     def create_session(
         self,
         repo_path: str,
         query: str,
         max_steps: int | None = None,
         session_id: str | None = None,
+        user_id: str | None = None,
     ) -> InvestigationSession:
         """Validate input, mint an investigation ID, and schedule background run."""
         resolved_path = resolve_repo_path(repo_path)
@@ -143,6 +153,8 @@ class InvestigationManager:
             existing.status = "INITIALIZED"
             existing.event_history = []
             existing.clarification_prompt = None
+            if user_id:
+                existing.user_id = user_id
             session = existing
         else:
             session = InvestigationSession(
@@ -150,6 +162,7 @@ class InvestigationManager:
                 repo_path=str(resolved_path),
                 query=query,
                 max_steps=steps,
+                user_id=user_id,
             )
             self._sessions[investigation_id] = session
 
@@ -348,6 +361,19 @@ class InvestigationManager:
                             "limitations": session.state_values.get("limitations", []),
                         },
                     )
+
+                    try:
+                        await db_manager.save_investigation(
+                            inv_id=session.investigation_id,
+                            chat_id=None,
+                            user_id=session.user_id,
+                            status=session.status,
+                            query_text=session.query,
+                            findings=session.state_values.get("findings", []),
+                            citations=session.state_values.get("citations", []),
+                        )
+                    except Exception as save_err:
+                        logger.warning("Could not persist investigation to database: %s", save_err)
 
         except GraphInterrupt:
             # LangGraph interrupt() called — save clarification prompt and pause
