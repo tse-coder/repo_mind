@@ -57,6 +57,9 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
+  toolCalls?: ToolCallItem[];
+  plan?: PlanGoal[];
+  reflections?: ReflectionItem[];
 }
 
 export interface ChatSession {

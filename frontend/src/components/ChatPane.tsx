@@ -5,6 +5,7 @@ import { Loader2, Send, AlertCircle } from 'lucide-react';
 import { ChatSession } from '../types';
 import { RepoSelector } from './RepoSelector';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { ThoughtProcess } from './ThoughtProcess';
 
 interface ChatPaneProps {
   chat: ChatSession | null;
@@ -71,6 +72,15 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
               : msg.content;
           const isUser = msg.role === 'user';
 
+          // Extract thought process data for this message
+          const isCurrentInvestigating = isLast && isInvestigating;
+          const messageToolCalls =
+            (isLast && chat.state.toolCalls.length > 0 ? chat.state.toolCalls : msg.toolCalls) || [];
+          const messagePlan =
+            (isLast && chat.state.plan.length > 0 ? chat.state.plan : msg.plan) || [];
+          const messageReflections =
+            (isLast && chat.state.reflections.length > 0 ? chat.state.reflections : msg.reflections) || [];
+
           return (
             <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
               {isUser ? (
@@ -81,12 +91,21 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
               ) : (
                 /* AI response: plain background, no border, text rendered cleanly */
                 <div className="w-full text-slate-900 text-sm py-1">
+                  <ThoughtProcess
+                    isInvestigating={isCurrentInvestigating}
+                    currentNode={isCurrentInvestigating ? chat.state.currentNode : undefined}
+                    toolCalls={messageToolCalls}
+                    plan={messagePlan}
+                    reflections={messageReflections}
+                  />
+
                   {body ? (
-                    <MarkdownRenderer content={body} />
-                  ) : (
-                    <span className="flex items-center gap-2 text-xs font-mono text-slate-500 py-1">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Investigating{chat.state.currentNode ? ` · ${chat.state.currentNode}` : '...'}
+                    <div className="mt-1">
+                      <MarkdownRenderer content={body} />
+                    </div>
+                  ) : isCurrentInvestigating ? null : (
+                    <span className="flex items-center gap-2 text-xs font-mono text-slate-400 py-1">
+                      No response generated.
                     </span>
                   )}
                 </div>

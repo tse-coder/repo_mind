@@ -326,7 +326,15 @@ export default function Home() {
           updateChat(targetChatId, (chat) => {
             const answer = payload.final_answer || chat.state.final_answer || chat.state.tokens.join('');
             const messages = chat.messages.map((m, i, arr) =>
-              i === arr.length - 1 && m.role === 'assistant' ? { ...m, content: answer } : m
+              i === arr.length - 1 && m.role === 'assistant'
+                ? {
+                    ...m,
+                    content: answer,
+                    toolCalls: chat.state.toolCalls,
+                    plan: chat.state.plan,
+                    reflections: chat.state.reflections,
+                  }
+                : m
             );
             return {
               ...chat,
@@ -353,7 +361,13 @@ export default function Home() {
               const answer = stateData.final_answer || chat.state.final_answer || chat.state.tokens.join('');
               const messages = chat.messages.map((m, i, arr) =>
                 i === arr.length - 1 && m.role === 'assistant' && answer
-                  ? { ...m, content: answer }
+                  ? {
+                      ...m,
+                      content: answer,
+                      toolCalls: chat.state.toolCalls,
+                      plan: stateData.plan || chat.state.plan,
+                      reflections: chat.state.reflections,
+                    }
                   : m
               );
               return {
