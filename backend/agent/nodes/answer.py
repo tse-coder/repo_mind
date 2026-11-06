@@ -8,7 +8,7 @@ from backend.agent.state import InvestigationState
 
 
 def answer_node(state: InvestigationState) -> dict:
-    """Format final output with citations, limitations, and confidence rating."""
+    """Format final output with citations and limitations."""
     draft = state.get("draft_answer", "")
     limitations = state.get("limitations", [])
     raw_status = state.get("status", "SUFFICIENT")
@@ -16,19 +16,8 @@ def answer_node(state: InvestigationState) -> dict:
         status = "PARTIAL" if limitations else "SUFFICIENT"
     else:
         status = raw_status
-    step_count = state.get("step_count", 0)
-    evidence_count = len(state.get("evidence_store", []))
-    findings = state.get("findings", [])
 
     sections = [draft.strip()]
-
-    # Findings confidence breakdown
-    if findings:
-        conf_lines = ["\n### Finding Confidence Ratings"]
-        for f in findings:
-            badge = "🟢 CONFIRMED" if f["confidence"] == "CONFIRMED" else "🟡 INFERRED"
-            conf_lines.append(f"- **{badge}**: {f['claim']}")
-        sections.append("\n".join(conf_lines))
 
     # Limitations & caveats
     if limitations:
@@ -36,12 +25,6 @@ def answer_node(state: InvestigationState) -> dict:
         for lim in limitations:
             lim_lines.append(f"- {lim}")
         sections.append("\n".join(lim_lines))
-
-    # Meta summary
-    sections.append(
-        f"\n---\n*Investigation completed with status: **{status}** | "
-        f"Steps executed: {step_count} | Evidence citations: {evidence_count}*"
-    )
 
     final_text = "\n\n".join(sections)
     return {

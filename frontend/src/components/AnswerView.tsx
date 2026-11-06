@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, ShieldCheck, AlertCircle, Copy, Check, Eye, Code } from 'lucide-react';
+import { FileText, AlertCircle, Copy, Check, Eye, Code } from 'lucide-react';
 import { FindingItem } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
@@ -113,33 +113,6 @@ export const AnswerView: React.FC<AnswerViewProps> = ({
               </pre>
             )}
           </div>
-
-          {/* Finding Confidence Ratings */}
-          {findings.length > 0 && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <span className="text-xs font-mono font-semibold text-slate-700 uppercase tracking-wider block flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-slate-600" /> Claim Verification Breakdown:
-              </span>
-              <div className="space-y-1.5">
-                {findings.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs">
-                    <span
-                      className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase font-semibold shrink-0 border ${
-                        f.confidence === 'CONFIRMED'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                          : f.confidence === 'INFERRED'
-                          ? 'bg-amber-50 text-amber-700 border-amber-300'
-                          : 'bg-red-50 text-red-700 border-red-300'
-                      }`}
-                    >
-                      {f.confidence}
-                    </span>
-                    <span className="text-slate-800">{f.claim}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Limitations and Knowledge Gaps */}
           {limitations.length > 0 && (

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { GitBranch, Activity, AlertCircle } from 'lucide-react';
+import { GitBranch, AlertCircle } from 'lucide-react';
 
 interface HeaderProps {
   currentNode?: string;
@@ -11,7 +11,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentNode,
   commitSha,
 }) => {
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
@@ -54,13 +53,6 @@ export const Header: React.FC<HeaderProps> = ({
             <GitBranch className="w-3.5 h-3.5 text-slate-500" />
             <span className="text-slate-400">commit:</span>
             <span className="font-semibold text-slate-800">{commitSha}</span>
-          </div>
-        )}
-
-        {currentNode && (
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-xs font-mono text-blue-700">
-            <Activity className="w-3.5 h-3.5 text-blue-600 animate-spin" />
-            <span>node: <strong>{currentNode}</strong></span>
           </div>
         )}
       </div>
