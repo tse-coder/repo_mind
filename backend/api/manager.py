@@ -272,7 +272,7 @@ class InvestigationManager:
                             {
                                 "tool": latest.get("tool_slug"),
                                 "status": latest.get("status"),
-                                "summary": summary[:600],
+                                "summary": summary[:2500],
                                 "step": latest.get("step"),
                             },
                         )

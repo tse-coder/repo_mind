@@ -82,7 +82,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
             (isLast && chat.state.reflections.length > 0 ? chat.state.reflections : msg.reflections) || [];
 
           return (
-            <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} min-w-0 max-w-full`}>
               {isUser ? (
                 /* User request box: subtle light background, light border, rounded */
                 <div className="max-w-[80%] px-4 py-2.5 bg-slate-100 border border-slate-200/90 text-slate-900 rounded-2xl rounded-br-sm shadow-xs text-sm">
@@ -90,7 +90,7 @@ export const ChatPane: React.FC<ChatPaneProps> = ({ chat, isInvestigating, onSta
                 </div>
               ) : (
                 /* AI response: plain background, no border, text rendered cleanly */
-                <div className="w-full text-slate-900 text-sm py-1">
+                <div className="w-full min-w-0 max-w-full text-slate-900 text-sm py-1">
                   <ThoughtProcess
                     isInvestigating={isCurrentInvestigating}
                     currentNode={isCurrentInvestigating ? chat.state.currentNode : undefined}
